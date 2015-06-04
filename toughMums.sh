@@ -221,7 +221,7 @@ then
         echo "#PBS -l nodes=1:ppn=$PROCS" >> $TOUGHMUMSEXEC
 fi
 
-echo "source $WRAPPERDIR/settings.sh"
+echo "source $WRAPPERDIR/settings.sh" >> $TOUGHMUMSEXEC
 echo "perl $TOUGHMUMSPATH/getCohortCounts.pl $IDENTIFIERS_DEST > $TOUGHMUMSTEMP/cohortCounts.txt" >> $TOUGHMUMSEXEC
 echo "echo \"Done getCohortCounts.pl\" 1>&2" >> $TOUGHMUMSEXEC
 echo "cd $TOUGHMUMSPATH" >> $TOUGHMUMSEXEC
