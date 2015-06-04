@@ -35,8 +35,8 @@ case $key in
     PROCS="$2"
     shift
     ;;
-    --bed)
-    BED="yes"
+    -x|--bed)
+    USEBED="$2"
     shift
     ;;
 
@@ -80,7 +80,7 @@ Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesC
 
 -p	Number of processors to use on the cluster node. Defaults to 4.
 
---bed   Use bedtools
+-x      Add string to use bedtools, this should be a flag but is not.
 "
 
 if [ -z $IDENTIFIERS ]
@@ -221,15 +221,16 @@ then
         echo "#PBS -l nodes=1:ppn=$PROCS" >> $TOUGHMUMSEXEC
 fi
 
+echo "source $WRAPPERDIR/settings.sh"
 echo "perl $TOUGHMUMSPATH/getCohortCounts.pl $IDENTIFIERS_DEST > $TOUGHMUMSTEMP/cohortCounts.txt" >> $TOUGHMUMSEXEC
 echo "echo \"Done getCohortCounts.pl\" 1>&2" >> $TOUGHMUMSEXEC
 echo "cd $TOUGHMUMSPATH" >> $TOUGHMUMSEXEC
 echo "bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/cohortCounts.txt $OUTFILE $FEMALESCOUNT $MALESCOUNT" >> $TOUGHMUMSEXEC
 echo "echo \"Done compareAllChromosomes.sh\" 1>&2" >> $TOUGHMUMSEXEC
 
-if ! [ -z $BED ]
+if ! [ -z $USEBED ]
 then
-	echo "useBed=1" >> $TOUGHMUMSEXEC
+	echo "useBed='yes'" >> $TOUGHMUMSEXEC
 fi
 
 if ! [ -z $BAMIDS ]
