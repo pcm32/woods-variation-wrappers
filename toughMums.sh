@@ -261,7 +261,7 @@ echo \"Seconds taken : \"\$((checkpoint2-checkpoint))
 parallel --gnu -P $PROCS '
         NAME=\$(basename {} .bam)
 	useBed=$USEBED
-	if [ -z \$useBed ]
+	if ! [ -z \$useBed ]
 	then
 		bamToBed -i {} | sort -k1,1 -k2,2n | intersectBed -a $TOUGHMUMSTEMP/\$NAME.locs.bed -b stdin -v | awk '\\''{ print $1\":\"$2 }'\\'' > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt    
 	else
