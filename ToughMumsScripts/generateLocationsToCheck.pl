@@ -8,6 +8,11 @@ use warnings;
 my %locationsInFile;
 my $chr = '';
 
+my $bedOutput = 0;
+if( scalar(@ARGV) > 2 && $ARGV[2] eq "bedfile") {
+	$bedOutput = 1;
+}
+
 open (FILE, $ARGV[0]);
 while (my $line = <FILE>) {
 	if (index($line, "Position") != -1) {
@@ -33,7 +38,12 @@ while (my $line = <FILE>) {
 	my @lineParts = split("\t", $line);
 	if (not exists $locationsInFile{$lineParts[0]}{$lineParts[1]}) {
 		if ($chr) {
-			print "chr$lineParts[0]:$lineParts[1]\n";
+			if($bedOutput) {
+				print "chr$lineParts[0]\t".($lineParts[1]-1)."\t".($lineParts[1]-1)."\n";
+			}
+			else {
+				print "chr$lineParts[0]:$lineParts[1]\n";
+			}
 		}
 		else {
 			print "$lineParts[0]:$lineParts[1]\n";

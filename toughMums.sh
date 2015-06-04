@@ -35,6 +35,10 @@ case $key in
     PROCS="$2"
     shift
     ;;
+    --bed)
+    BED=1
+    shift
+    ;;
 
     *)
             # unknown option
@@ -44,7 +48,7 @@ shift
 done
 
 USAGEMSG="
-Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesCount [-c] [-o <outputFilePath>] -p numProcessors
+Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesCount [-c] [-o <outputFilePath>] -p numProcessors --bed
 
 -i	Identifiers, id1;id2;idN, where each of these are expected to be found in the $ANNOTATED_VCFS_PATH/id1.annot.tab
 	Alternatively, if too many identifiers are to be given, or they require zero padding, brace expansion can be used.
@@ -75,6 +79,8 @@ Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesC
 -o	(optional) Out file path. Defaults to $TOUGHMUMSRESULTS/<groupID>_toughmums_out.txt
 
 -p	Number of processors to use on the cluster node. Defaults to 4.
+
+--bed   Use bedtools
 "
 
 if [ -z $IDENTIFIERS ]
@@ -220,6 +226,12 @@ echo "echo \"Done getCohortCounts.pl\" 1>&2" >> $TOUGHMUMSEXEC
 echo "cd $TOUGHMUMSPATH" >> $TOUGHMUMSEXEC
 echo "bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/cohortCounts.txt $OUTFILE $FEMALESCOUNT $MALESCOUNT" >> $TOUGHMUMSEXEC
 echo "echo \"Done compareAllChromosomes.sh\" 1>&2" >> $TOUGHMUMSEXEC
+
+if ! [ -z $BED ]
+then
+	echo "useBed=1" >> $TOUGHMUMSEXEC
+fi
+
 if ! [ -z $BAMIDS ]
 then
 	echo "IFS=\$'\\n' read -d '' -r -a lines < $IDENTIFIERS_DEST" >> $TOUGHMUMSEXEC
@@ -231,9 +243,16 @@ then
 checkpoint=\`date +%s\`
 parallel --gnu -P $PROCS '
 	NAME=\$(basename {} .annot.tab)
-	perl $TOUGHMUMSPATH/generateLocationsToCheck.pl {} $OUTFILE > $TOUGHMUMSTEMP/\$NAME.locs.txt
-	sort $TOUGHMUMSTEMP/\$NAME.locs.txt | uniq > $TOUGHMUMSTEMP/\$NAME\"_sortRes\"
-	mv $TOUGHMUMSTEMP/\$NAME\"_sortRes\" $TOUGHMUMSTEMP/\$NAME.locs.txt
+	# we should include generateLocationsToCheck in the repo, and modify it to produce a bed file
+	# of the locations already sorted (NAME.locs.txt)
+	if ! [ -z \$useBed ]
+	then
+	  perl $TOUGHMUMSPATHSC/generateLocationsToCheck.pl {} $OUTFILE bedfile | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/(^chrGL\\S+)_random/\\1/\" | sed \"s/(^chrGL\\S+)/\\1\\.1/\" | sort -u -k 1,1 -k2,2n > $TOUGHMUMSTEMP/\$NAME.locs.bed
+  	else
+	  perl $TOUGHMUMSPATH/generateLocationsToCheck.pl {} $OUTFILE > $TOUGHMUMSTEMP/\$NAME.locs.txt
+	  sort $TOUGHMUMSTEMP/\$NAME.locs.txt | uniq > $TOUGHMUMSTEMP/\$NAME\"_sortRes\"
+	  mv $TOUGHMUMSTEMP/\$NAME\"_sortRes\" $TOUGHMUMSTEMP/\$NAME.locs.txt
+        fi
 	' ::: \${lines[@]}
 #done
 echo \"Done generateLocationsToCheck.pl\" 1>&2
@@ -244,10 +263,14 @@ echo \"Seconds taken : \"\$((checkpoint2-checkpoint))
 #for i in \"\${bamLines[@]}\"
 #do
 parallel --gnu -P $PROCS '
-	NAME=\$(basename {} .bam)
-	python $MUTATIONFILTERPATH/ExonReads/reads_only_locs.py {} $TOUGHMUMSTEMP/\$NAME.locs.txt > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt
+        NAME=\$(basename {} .bam)
+	if [ -z \$useBed ]
+	then
+		bamToBed -i {} | sed \"s/^chrM(\\s)/chrMT\\1/\" | sort -k1,1 -k2,2n | intersectBed -a $TOUGHMUMSTEMP/\$NAME.locs.bed -b stdin -v | awk '\\''{ print $1\":\"$2 }'\\'' > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt    
+	else
+      	  python $MUTATIONFILTERPATH/ExonReads/reads_only_locs.py {} $TOUGHMUMSTEMP/\$NAME.locs.txt > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt
+        fi
 	echo \"$TOUGHMUMSTEMP/\$NAME.unsequenced.txt\" >> $TOUGHMUMSTEMP/namesOfUnsequencedLocFiles.txt
-	#bamToBed -i {} | 
 	' ::: \${bamLines[@]}
 #done
 echo \"Done reads_only_locs\" 1>&2
