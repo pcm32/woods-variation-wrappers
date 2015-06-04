@@ -228,10 +228,6 @@ echo "cd $TOUGHMUMSPATH" >> $TOUGHMUMSEXEC
 echo "bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/cohortCounts.txt $OUTFILE $FEMALESCOUNT $MALESCOUNT" >> $TOUGHMUMSEXEC
 echo "echo \"Done compareAllChromosomes.sh\" 1>&2" >> $TOUGHMUMSEXEC
 
-if ! [ -z $USEBED ]
-then
-	echo "useBed='yes'" >> $TOUGHMUMSEXEC
-fi
 
 if ! [ -z $BAMIDS ]
 then
@@ -239,11 +235,10 @@ then
 	echo "IFS=\$'\\n' read -d '' -r -a bamLines < $BAMIDENTS_DEST" >> $TOUGHMUMSEXEC
 	FORPART="
 # Generate lists of locations to check in each individual
-#for i in \"\${lines[@]}\"
-#do
 checkpoint=\`date +%s\`
 parallel --gnu -P $PROCS '
 	NAME=\$(basename {} .annot.tab)
+	useBed=$USEBED
 	# we should include generateLocationsToCheck in the repo, and modify it to produce a bed file
 	# of the locations already sorted (NAME.locs.txt)
 	if ! [ -z \$useBed ]
@@ -265,6 +260,7 @@ echo \"Seconds taken : \"\$((checkpoint2-checkpoint))
 #do
 parallel --gnu -P $PROCS '
         NAME=\$(basename {} .bam)
+	useBed=$USEBED
 	if [ -z \$useBed ]
 	then
 		bamToBed -i {} | sort -k1,1 -k2,2n | intersectBed -a $TOUGHMUMSTEMP/\$NAME.locs.bed -b stdin -v | awk '\\''{ print $1\":\"$2 }'\\'' > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt    
