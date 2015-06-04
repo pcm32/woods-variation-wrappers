@@ -247,7 +247,7 @@ parallel --gnu -P $PROCS '
 	# of the locations already sorted (NAME.locs.txt)
 	if ! [ -z \$useBed ]
 	then
-	  perl $TOUGHMUMSPATHSC/generateLocationsToCheck.pl {} $OUTFILE bedfile | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/(^chrGL\\S+)_random/\\1/\" | sed \"s/(^chrGL\\S+)/\\1\\.1/\" | sort -u -k 1,1 -k2,2n > $TOUGHMUMSTEMP/\$NAME.locs.bed
+	  perl $TOUGHMUMSPATHSC/generateLocationsToCheck.pl {} $OUTFILE bedfile | sed \"s/^chrM(\\s)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/(^chrGL\\S+)_random/\\1/\" | sed \"s/(^chrGL\\S+)/\\1\\.1/\" | sort -u -k 1,1 -k2,2n > $TOUGHMUMSTEMP/\$NAME.locs.bed
   	else
 	  perl $TOUGHMUMSPATH/generateLocationsToCheck.pl {} $OUTFILE > $TOUGHMUMSTEMP/\$NAME.locs.txt
 	  sort $TOUGHMUMSTEMP/\$NAME.locs.txt | uniq > $TOUGHMUMSTEMP/\$NAME\"_sortRes\"
@@ -266,7 +266,7 @@ parallel --gnu -P $PROCS '
         NAME=\$(basename {} .bam)
 	if [ -z \$useBed ]
 	then
-		bamToBed -i {} | sed \"s/^chrM(\\s)/chrMT\\1/\" | sort -k1,1 -k2,2n | intersectBed -a $TOUGHMUMSTEMP/\$NAME.locs.bed -b stdin -v | awk '\\''{ print $1\":\"$2 }'\\'' > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt    
+		bamToBed -i {} | sort -k1,1 -k2,2n | intersectBed -a $TOUGHMUMSTEMP/\$NAME.locs.bed -b stdin -v | awk '\\''{ print $1\":\"$2 }'\\'' > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt    
 	else
       	  python $MUTATIONFILTERPATH/ExonReads/reads_only_locs.py {} $TOUGHMUMSTEMP/\$NAME.locs.txt > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt
         fi
