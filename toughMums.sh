@@ -36,7 +36,7 @@ case $key in
     shift
     ;;
     --bed)
-    BED=1
+    BED="yes"
     shift
     ;;
 
