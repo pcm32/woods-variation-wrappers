@@ -253,7 +253,7 @@ parallel --gnu -P $PROCS '
 #done
 echo \"Done generateLocationsToCheck.pl\" 1>&2
 checkpoint2=\`date +%s\`
-echo \"Seconds taken : \"\$((checkpoint2-checkpoint)) 
+echo \"Seconds taken : \"\$((checkpoint2-checkpoint)) 1>&2
 
 # check actual locations for sequencing
 #for i in \"\${bamLines[@]}\"
@@ -273,7 +273,7 @@ parallel --gnu -P $PROCS '
 #done
 echo \"Done reads_only_locs\" 1>&2
 checkpoint3=\`date +%s\`
-echo \"Seconds taken : \"\$((checkpoint3-checkpoint2))
+echo \"Seconds taken : \"\$((checkpoint3-checkpoint2)) 1>&2
 
 # update frequency counts 
 # Original counts denote lower bounds on frequencies because assumes all locations not in file are those corresponding to ref alleles
@@ -283,7 +283,7 @@ cd $TOUGHMUMSPATH
 bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/newCohortCounts.txt $OUTFILE_DIR/UpperBounds_$OUTFILE_BASENAME $FEMALESCOUNT $MALESCOUNT
 echo \"Done compareAllChromosomes\" 1>&2
 checkpoint4=\`date +%s\`
-echo \"Seconds taken : \"\$((checkpoint4-checkpoint3))
+echo \"Seconds taken (update and compare): \"\$((checkpoint4-checkpoint3)) 1>&2
 rm $TOUGHMUMSTEMP/namesOfUnsequencedLocFiles.txt
 "
 
