@@ -263,7 +263,7 @@ parallel --gnu -P $PROCS '
 	useBed=$USEBED
 	if ! [ -z \$useBed ]
 	then
-		bamToBed -i {} | sed \"s/^chrM\\(\\s\\)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/\\(^chrGL\\S+\\)_random/\\1/\" | sed \"s/\\(^chrGL\\S+\\)/\\1\\.1/\" | sort -k1,1 -k2,2n | intersectBed -a $TOUGHMUMSTEMP/\$NAME.locs.bed -b stdin -v | awk '\\''{ print \$1\":\"\$2 }'\\'' > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt    
+		bamToBed -i {} | sed \"s/^chrM\\(\\s\\)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/\\(^chrGL\\S+\\)_random/\\1/\" | sed \"s/\\(^chrGL\\S+\\)/\\1\\.1/\" | sort -k1,1 -k2,2n | intersectBed -a $TOUGHMUMSTEMP/\$NAME.locs.bed -b stdin -v -sorted | awk '\\''{ print \$1\":\"\$2 }'\\'' > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt    
 	else
       	  python $MUTATIONFILTERPATH/ExonReads/reads_only_locs.py {} $TOUGHMUMSTEMP/\$NAME.locs.txt > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt
         fi
