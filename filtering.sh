@@ -94,9 +94,8 @@ Usage: filtering.sh -i <inputFilePath> [-b bamInputFile -e minSubjectsExonReads]
 
 -p	Parameters line
 
-	A string ENCLOSED IN DOUBLE QUOTES which is given to the runMutationFilter. See parameters
-	options on Katie's documentation (page 16 on approximately). Missing double quotes can make
-	this wrapper fail miserably.
+	A string which is given to the runMutationFilter, ENCLOSED IN DOUBLE QUOTES. See parameters options on 
+	Katie's documentation (page 16 on approximately). Missing double quotes can make this wrapper fail miserably.
 
 -o	Output file name prefix, full path.
 
@@ -136,7 +135,7 @@ then
 		fi
 	elif [ "$SETP" == "4" ]
 	then
-		PARAMETERS="-filters in;mt;snp –Mut_Type m"
+		PARAMETERS="-filters \"in;mt;snp\" –Mut_Type m"
 	else
 		echo "Option $SETP for -s not recognized, please see usage by invoking without arguments"
 		exit 1
@@ -274,7 +273,7 @@ fi
 
 #echo "Past BAM parts"
 
-echo "java -cp $MUTATIONFILTERPATH/src/:$MUTATIONFILTERPATH/* com.example.mutationfilter.FilterProgram $INPUTLIST $OUTFILE \"$PARAMETERS\"" >> $RUNFILTEREXEC
+echo "java -cp $MUTATIONFILTERPATH/src/:$MUTATIONFILTERPATH/* com.example.mutationfilter.FilterProgram $INPUTLIST $OUTFILE $PARAMETERS" >> $RUNFILTEREXEC
 
 echo "rm -rf $XREFDEST" >> $RUNFILTEREXEC
 
