@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# move input file to enumeration on the cli, using ; for line change and : for same family (same line)
+
 source settings.sh
 
 while [[ $# > 1 ]]
@@ -225,7 +227,7 @@ then
 	PARAMETERS=$PARAMETERS" -ref $XREFDEST -ref_cutoff=$XREFCUTOFF"
 fi
 
-echo "Past cross refs part"
+#echo "Past cross refs part"
 
 # Use location coverage check
 
@@ -270,7 +272,7 @@ then
 
 fi
 
-echo "Past BAM parts"
+#echo "Past BAM parts"
 
 echo "java -cp $MUTATIONFILTERPATH/src/:$MUTATIONFILTERPATH/* com.example.mutationfilter.FilterProgram $INPUTLIST $OUTFILE \"$PARAMETERS\"" >> $RUNFILTEREXEC
 
@@ -282,6 +284,7 @@ echo "About to send job to the cluster..."
 echo "For your records, this is job execution $GROUPID"
 echo "The execution script for this job is: $RUNFILTEREXEC"
 echo "This file will include all settings used."
+echo "The result file should be found here: $OUTFILE"
 
 qsub -q $LONGQUEUE -d $RUNJOBSPATH $RUNFILTEREXEC
 
