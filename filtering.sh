@@ -221,7 +221,7 @@ then
 		fi
 	done
 
-	cat copyCrossReferences_TEMPLATE.sh | sed s/CROSSREFSLOT/$CROSSREFIDs/g | sed s/XREFDESTSLOT/$XREFDEST/g >> $RUNFILTEREXEC
+	cat copyCrossReferences_TEMPLATE.sh | sed "s/CROSSREFSLOT/$CROSSREFIDs/g" | sed "s+XREFDESTSLOT+$XREFDEST+g" >> $RUNFILTEREXEC
 	PARAMETERS=$PARAMETERS" -ref $XREFDEST -ref_cutoff=$XREFCUTOFF"
 fi
 
@@ -233,7 +233,7 @@ echo "Past cross refs part"
 if ! [ -z $BAMPATHS ] && [ -e $BAMPATHS ]
 then
 	echo "Got intp BAM part"
-	if ! [ -z $EXONREADS ]
+	if [ -z $EXONREADS ]
 	then
 		echo "Option -e (Exon reads) needs to be specified (integer > 0) when providing BAM files"
 		echo "removing $RUNFILTEREXEC"
