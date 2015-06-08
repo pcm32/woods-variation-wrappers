@@ -72,7 +72,7 @@ Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1;ID2;ID
 
 	-i \"1,2:3:15,16\"
 
-	Please not the double quote.
+	Please note the double quote.
 
 	The script will check that files exists.
 
@@ -109,6 +109,11 @@ Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1;ID2;ID
 
 -r	CrossRefs reference cut-off (optional, required when using -c )
 "
+
+if [ -z $1 ]; then
+	echo "$USAGEMSG"
+	exit 1
+fi
 
 if ! [ -z $SETP ]
 then
