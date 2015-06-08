@@ -5,7 +5,7 @@ source settings.sh
 USAGEMSG="
 Usage: dataFormatting.sh \"{identifiers_in_brace_expasion}\"
 
-	The identifiers of the sample is what complete the following path: $OLD_VCFS_PATH/<identifier>.snps.vcf and, optionally if available
+	The identifiers of the sample is what completes the following path: $OLD_VCFS_PATH/<identifier>.snps.vcf and, optionally if available
 	$OLD_VCFS_PATH/<identifier>.indels.vcf . If both files are present, they will be merged, and then variant effect predictor is run. 
 	If only the first file is present, then the variant effect predictor is run only on this file. The script will detect whether 
 	the VCF was created with a different version of the human assembly/annotation than hg19, and run liftOver if necessary.
@@ -20,11 +20,18 @@ Usage: dataFormatting.sh \"{identifiers_in_brace_expasion}\"
 
 	All jobs are sent to the cluster. Log files with info an any errors will be left at:
 
-	$OLD_VCFS_PATH/<identifier>.data.format.log.{1,2,3}
+	$FORMATTINGTEMP/<groupIdentifier>/<identifier>.data.format.log.{1,2,3}
 
-	if the path where the <identifier>.snps.vcf is expected to be found, it can be changed in the setting.sh file, modifying var
+	where <groupIdentifier> is given at the end of the execution of the script.
+
+	If the path where the file <identifier>.snps.vcf is expected to be found, it can be changed in the setting.sh file, modifying var
 		OLD_VCFS_PATH
 	"
+
+if [  $# -le 1 ]; then 
+	echo "$USAGEMSG"
+	exit 1
+fi
 
 reBrace='\{'
 if [[ $1 =~ $reBrace ]] ; then
@@ -92,6 +99,7 @@ for FILEPREFIX in "${identsArray[@]}"; do
 	VEPPROC=`qsub -q $LONGQUEUE $WAITFOR -j oe -o $LOG.3 -v FILE_IN=$FILEPREFIX ./runRecipe.sh`
 done
 
+echo "For your reference the group identifier for this jon is $GROUPID"
 echo "Temp directory with errors and information is $TEMPDIR"
 echo "Results should end in $ANNOTATED_VCFS_PATH"
 
