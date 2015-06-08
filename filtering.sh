@@ -170,7 +170,7 @@ else
 	mkdir -p $FILTERINGTEMP
 	INPUTLIST=$FILTERINGTEMP/identifierListFiles.txt
 	if [ $useBAMs ]; then
-		INPUTLISTBAM=$FILTERINGTEMP/BAMidentifierListFiles.txt
+		BAMINPUTLIST=$FILTERINGTEMP/BAMidentifierListFiles.txt
 	fi
 	reIndWithinFamSep=','
 	reFamilySep=':'
