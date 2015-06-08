@@ -228,7 +228,7 @@ else
 		done
 	else
 		# all same family
-		for inFamily in $(echo $family | tr ",")
+		for inFamily in $(echo $family | tr "," "\n")
 		do
 			fileToAdd=$ANNOTATED_VCFS_PATH/$inFamily".annot.tab"
 			checkFileExistanceExit $fileToAdd $inFamily	
