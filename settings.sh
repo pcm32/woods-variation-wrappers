@@ -15,6 +15,7 @@ GENEFILTERPATH=/data/woods/GeneFilter
 GENEFILTERRESPATH=/results/woods/GeneFilter
 
 MUTATIONFILTERPATH=/data/woods/MutationFilter
+MUTATIONFILTERRESULTS=/results/woods/MutationFilter
 MUTFILTXREFsDIR=$ANNOTATED_VCFS_PATH/Cross_Reference
 
 RUNJOBSPATH=/data/woods/runJobs
