@@ -97,7 +97,7 @@ Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1;ID2;ID
 	A string which is given to the runMutationFilter, ENCLOSED IN DOUBLE QUOTES. See parameters options on 
 	Katie's documentation (page 16 on approximately). Missing double quotes can make this wrapper fail miserably.
 
--o	Output file name prefix, full path.
+-o	(optional) Output file name prefix, full path.
 
 -s	Set of parameters
 
@@ -271,8 +271,8 @@ fi
 if [ -z $OUTFILE ]
 then
 	echo "Missing out file prefix option (-o)"
-	OUTFILE=$MUTATIONFILTERRESULTS/$GROUPID"_filtering_out.txt"
-	echo "Setting default to $OUTFILE"
+	OUTFILE=$MUTATIONFILTERRESULTS/$GROUPID"_filtering"
+	echo "Setting default to "$OUTFILE"_Genes.txt"
 fi
 
 RUNFILTEREXEC=$RUNJOBSPATH/filtering_$GROUPID.sh
