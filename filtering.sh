@@ -77,7 +77,7 @@ Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1;ID2;ID
 	The script will check that files exists.
 
 -b	Flag Use BAM files for same identifiers as provided in -i
-	Files will be expected to be in $BAMPATHS/<identifier>.bam and $BAMPATHS/<identifier>.bam.bai
+	Files will be expected to be in $BAMSPATH/<identifier>.bam and $BAMSPATH/<identifier>.bam.bai
 	The script will check that files exists.
 
 -e	Exon Read (optional, required when using -b)
@@ -128,7 +128,7 @@ then
 	then
 		PARAMETERS="-r"
 		EXONREADS=2
-		if [ -z $BAMPATHS ]
+		if ! [ $useBAMs ]
 		then
 			echo "-s option 3 requires option -b for file with BAM paths being set, exiting"
 			exit 1
@@ -192,8 +192,8 @@ else
 						familyLine=$familyLine"\t"$fileToAdd
 					fi
 					if [ $useBAMs ]; then
-						bamFileToAdd=$BAMPATHS/$inFamily".bam"
-						baiFile=$BAMPATHS/$inFamily".bai"
+						bamFileToAdd=$BAMSPATH/$inFamily".bam"
+						baiFile=$BAMSPATH/$inFamily".bai"
 						checkFileExistanceExit $bamFileToAdd $inFamily
 						checkFileExistanceExit $baiFile $inFamily
 						if [ -z $familyLineBam ]; then
@@ -218,8 +218,8 @@ else
 				echo $fileToAdd >> $INPUTLIST
 
 				if [ $useBAMs ]; then
-					bamFileToAdd=$BAMPATHS/$inFamily".bam"
-					baiFile=$BAMPATHS/$inFamily".bai"
+					bamFileToAdd=$BAMSPATH/$inFamily".bam"
+					baiFile=$BAMSPATH/$inFamily".bai"
 					checkFileExistanceExit $bamFileToAdd $inFamily
 					checkFileExistanceExit $baiFile $inFamily
 					echo $bamFileToAdd >> $BAMINPUTLIST
@@ -228,7 +228,7 @@ else
 		done
 	else
 		# all same family
-		for inFamily in $(echo $family | tr "," "\n")
+		for inFamily in $(echo $IDENTIFIERS | tr "," "\n")
 		do
 			fileToAdd=$ANNOTATED_VCFS_PATH/$inFamily".annot.tab"
 			checkFileExistanceExit $fileToAdd $inFamily	
@@ -239,8 +239,8 @@ else
 			fi
 
 			if [ $useBAMs ]; then
-				bamFileToAdd=$BAMPATHS/$inFamily".bam"
-				baiFile=$BAMPATHS/$inFamily".bai"
+				bamFileToAdd=$BAMSPATH/$inFamily".bam"
+				baiFile=$BAMSPATH/$inFamily".bai"
 				checkFileExistanceExit $bamFileToAdd $inFamily
 				checkFileExistanceExit $baiFile $inFamily
 				if [ -z $familyLineBam ]; then
