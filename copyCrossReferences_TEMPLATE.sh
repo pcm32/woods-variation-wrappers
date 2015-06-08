@@ -1,0 +1,8 @@
+CROSSREFSIDS=CROSSREFSLOT
+DESTINATION=XREFDESTSLOT
+
+for xf in $(echo $CROSSREFIDS | tr ";" "\n")
+do
+	cp $ANNOTATED_VCFS_PATH/$xf.annot.tab $DESTINATION/
+done
+

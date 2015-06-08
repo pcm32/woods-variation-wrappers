@@ -35,6 +35,10 @@ case $key in
     PROCS="$2"
     shift
     ;;
+    -x|--bed)
+    USEBED="$2"
+    shift
+    ;;
 
     *)
             # unknown option
@@ -44,7 +48,7 @@ shift
 done
 
 USAGEMSG="
-Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesCount [-c] [-o <outputFilePath>] -p numProcessors
+Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesCount [-c] [-o <outputFilePath>] -p numProcessors --bed
 
 -i	Identifiers, id1;id2;idN, where each of these are expected to be found in the $ANNOTATED_VCFS_PATH/id1.annot.tab
 	Alternatively, if too many identifiers are to be given, or they require zero padding, brace expansion can be used.
@@ -75,6 +79,8 @@ Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesC
 -o	(optional) Out file path. Defaults to $TOUGHMUMSRESULTS/<groupID>_toughmums_out.txt
 
 -p	Number of processors to use on the cluster node. Defaults to 4.
+
+-x      Add string to use bedtools, this should be a flag but is not.
 "
 
 if [ -z $IDENTIFIERS ]
@@ -215,44 +221,59 @@ then
         echo "#PBS -l nodes=1:ppn=$PROCS" >> $TOUGHMUMSEXEC
 fi
 
+echo "source $WRAPPERDIR/settings.sh" >> $TOUGHMUMSEXEC
 echo "perl $TOUGHMUMSPATH/getCohortCounts.pl $IDENTIFIERS_DEST > $TOUGHMUMSTEMP/cohortCounts.txt" >> $TOUGHMUMSEXEC
 echo "echo \"Done getCohortCounts.pl\" 1>&2" >> $TOUGHMUMSEXEC
 echo "cd $TOUGHMUMSPATH" >> $TOUGHMUMSEXEC
 echo "bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/cohortCounts.txt $OUTFILE $FEMALESCOUNT $MALESCOUNT" >> $TOUGHMUMSEXEC
 echo "echo \"Done compareAllChromosomes.sh\" 1>&2" >> $TOUGHMUMSEXEC
+
+
 if ! [ -z $BAMIDS ]
 then
 	echo "IFS=\$'\\n' read -d '' -r -a lines < $IDENTIFIERS_DEST" >> $TOUGHMUMSEXEC
 	echo "IFS=\$'\\n' read -d '' -r -a bamLines < $BAMIDENTS_DEST" >> $TOUGHMUMSEXEC
 	FORPART="
 # Generate lists of locations to check in each individual
-#for i in \"\${lines[@]}\"
-#do
 checkpoint=\`date +%s\`
 parallel --gnu -P $PROCS '
 	NAME=\$(basename {} .annot.tab)
-	perl $TOUGHMUMSPATH/generateLocationsToCheck.pl {} $OUTFILE > $TOUGHMUMSTEMP/\$NAME.locs.txt
-	sort $TOUGHMUMSTEMP/\$NAME.locs.txt | uniq > $TOUGHMUMSTEMP/\$NAME\"_sortRes\"
-	mv $TOUGHMUMSTEMP/\$NAME\"_sortRes\" $TOUGHMUMSTEMP/\$NAME.locs.txt
+	useBed=$USEBED
+	# we should include generateLocationsToCheck in the repo, and modify it to produce a bed file
+	# of the locations already sorted (NAME.locs.txt)
+	if ! [ -z \$useBed ]
+	then
+	  perl $TOUGHMUMSPATHSC/generateLocationsToCheck.pl {} $OUTFILE bedfile | sed \"s/^chrM\\(\\s\\)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/\\(^chrGL\\S+\\)_random/\\1/\" | sed \"s/\\(^chrGL\\S+\\)/\\1\\.1/\" | sort -u -k 1,1 -k2,2n > $TOUGHMUMSTEMP/\$NAME.locs.bed
+  	else
+	  perl $TOUGHMUMSPATH/generateLocationsToCheck.pl {} $OUTFILE > $TOUGHMUMSTEMP/\$NAME.locs.txt
+	  sort $TOUGHMUMSTEMP/\$NAME.locs.txt | uniq > $TOUGHMUMSTEMP/\$NAME\"_sortRes\"
+	  mv $TOUGHMUMSTEMP/\$NAME\"_sortRes\" $TOUGHMUMSTEMP/\$NAME.locs.txt
+        fi
 	' ::: \${lines[@]}
 #done
 echo \"Done generateLocationsToCheck.pl\" 1>&2
 checkpoint2=\`date +%s\`
-echo \"Seconds taken : \"\$((checkpoint2-checkpoint)) 
+echo \"Seconds taken : \"\$((checkpoint2-checkpoint)) 1>&2
 
 # check actual locations for sequencing
 #for i in \"\${bamLines[@]}\"
 #do
 parallel --gnu -P $PROCS '
-	NAME=\$(basename {} .bam)
-	python $MUTATIONFILTERPATH/ExonReads/reads_only_locs.py {} $TOUGHMUMSTEMP/\$NAME.locs.txt > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt
+        NAME=\$(basename {} .bam)
+	useBed=$USEBED
+	if ! [ -z \$useBed ]
+	then
+	  bamToBed -i {} | sed \"s/^chrM\\(\\s\\)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/\\(^chrGL\\S+\\)_random/\\1/\" | sed \"s/\\(^chrGL\\S+\\)/\\1\\.1/\" | sort -k1,1 -k2,2n | intersectBed -a $TOUGHMUMSTEMP/\$NAME.locs.bed -b stdin -v -sorted | awk '\\''{ print \$1\":\"(\$2+1) }'\\'' > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt
+          # we add one to the coordinate at the end to move from 0-based nucleotide index in bam/bed to 1-based nucleotide based used by the existing scripts 
+	else
+      	  python $MUTATIONFILTERPATH/ExonReads/reads_only_locs.py {} $TOUGHMUMSTEMP/\$NAME.locs.txt > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt
+        fi
 	echo \"$TOUGHMUMSTEMP/\$NAME.unsequenced.txt\" >> $TOUGHMUMSTEMP/namesOfUnsequencedLocFiles.txt
-	#bamToBed -i {} | 
 	' ::: \${bamLines[@]}
 #done
 echo \"Done reads_only_locs\" 1>&2
 checkpoint3=\`date +%s\`
-echo \"Seconds taken : \"\$((checkpoint3-checkpoint2))
+echo \"Seconds taken : \"\$((checkpoint3-checkpoint2)) 1>&2
 
 # update frequency counts 
 # Original counts denote lower bounds on frequencies because assumes all locations not in file are those corresponding to ref alleles
@@ -262,7 +283,7 @@ cd $TOUGHMUMSPATH
 bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/newCohortCounts.txt $OUTFILE_DIR/UpperBounds_$OUTFILE_BASENAME $FEMALESCOUNT $MALESCOUNT
 echo \"Done compareAllChromosomes\" 1>&2
 checkpoint4=\`date +%s\`
-echo \"Seconds taken : \"\$((checkpoint4-checkpoint3))
+echo \"Seconds taken (update and compare): \"\$((checkpoint4-checkpoint3)) 1>&2
 rm $TOUGHMUMSTEMP/namesOfUnsequencedLocFiles.txt
 "
 

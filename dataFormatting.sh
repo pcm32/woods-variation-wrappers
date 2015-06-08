@@ -2,7 +2,37 @@
 
 source settings.sh
 
+USAGEMSG="
+Usage: dataFormatting.sh identifier
+
+	The identifier of the sample is what complete the following path: $OLD_VCFS_PATH/<identifier>.snps.vcf and, optionally if available
+	$OLD_VCFS_PATH/<identifier>.indels.vcf . If both files are present, they will be merged, and then variant effect predictor is run. 
+	If only the first file is present, then the variant effect predictor is run only on this file. The script will detect whether 
+	the VCF was created with a different version of the human assembly/annotation than hg19, and run lift over if necessary.
+
+	All jobs are sent to the cluster. Log files with info an any errors will be left at:
+
+	$OLD_VCFS_PATH/<identifier>.data.format.log.{1,2,3}
+
+	if the path where the <identifier>.snps.vcf is expected to be found, it can be changed in the setting.sh file, modifying var
+		OLD_VCFS_PATH
+	"
+
 FILEPREFIX=$1
+
+if [ -z $FILEPREFIX ]
+then
+	echo "Missing indentifier"
+	echo "$USAGEMSG"
+	exit 1
+fi
+
+if ! [ -e $OLD_VCFS_PATH/$FILEPREFIX.snps.vcf ]
+then
+	echo "File $OLD_VCFS_PATH/$FILEPREFIX.snps.vcf doesn't exist, exiting, run without arguments for help."
+	exit 1
+fi	
+
 WAITFOR=""
 CORRECTASSEMBLY=1
 
