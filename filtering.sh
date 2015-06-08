@@ -14,7 +14,7 @@ case $key in
     shift
     ;;
     -b|--useBAMs)
-    USEBAM=0
+    useBAMs=0
     ;;
     -c|--crossrefs)
     CROSSREFIDs="$2"
