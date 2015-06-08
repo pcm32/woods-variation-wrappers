@@ -183,7 +183,7 @@ else
 				for inFamily in $(echo $family | tr ",")
 				do
 					fileToAdd=$ANNOTATED_VCFS_PATH/$inFamily".annot.tab"
-					checkFileExistanceExit($fileToAdd,$inFamily)
+					checkFileExistanceExit $fileToAdd $inFamily
 					if ! [ -z $familyLine ]
 					then
 						familyLine=$fileToAdd
@@ -193,8 +193,8 @@ else
 					if [ $useBAMs ]; then
 						bamFileToAdd=$BAMPATHS/$inFamily".bam"
 						baiFile=$BAMPATHS/$inFamily".bai"
-						checkFileExistanceExit($bamFileToAdd,$inFamily)
-						checkFileExistanceExit($baiFile,$inFamily)
+						checkFileExistanceExit $bamFileToAdd $inFamily
+						checkFileExistanceExit $baiFile $inFamily
 						if ! [ -z $familyLineBam ]; then
 							familyLineBam=$bamFileToAdd
 						else
@@ -213,14 +213,14 @@ else
 			else
 				# all different families
 				fileToAdd=$ANNOTATED_VCFS_PATH/$family".annot.tab"
-				checkFileExistanceExit($fileToAdd,$family)				
+				checkFileExistanceExit $fileToAdd $family				
 				echo $fileToAdd >> $INPUTLIST
 
 				if [ $useBAMs ]; then
 					bamFileToAdd=$BAMPATHS/$inFamily".bam"
 					baiFile=$BAMPATHS/$inFamily".bai"
-					checkFileExistanceExit($bamFileToAdd,$inFamily)
-					checkFileExistanceExit($baiFile,$inFamily)
+					checkFileExistanceExit $bamFileToAdd $inFamily
+					checkFileExistanceExit $baiFile $inFamily
 					echo $bamFileToAdd >> $BAMINPUTLIST
 				fi
 			fi
@@ -230,7 +230,7 @@ else
 		for inFamily in $(echo $family | tr ",")
 		do
 			fileToAdd=$ANNOTATED_VCFS_PATH/$inFamily".annot.tab"
-			checkFileExistanceExit($fileToAdd,$inFamily)			
+			checkFileExistanceExit $fileToAdd $inFamily	
 			if ! [ -z $familyLine ]; then
 				familyLine=$fileToAdd
 			else
@@ -240,8 +240,8 @@ else
 			if [ $useBAMs ]; then
 				bamFileToAdd=$BAMPATHS/$inFamily".bam"
 				baiFile=$BAMPATHS/$inFamily".bai"
-				checkFileExistanceExit($bamFileToAdd,$inFamily)
-				checkFileExistanceExit($baiFile,$inFamily)
+				checkFileExistanceExit $bamFileToAdd $inFamily
+				checkFileExistanceExit $baiFile $inFamily
 				if ! [ -z $familyLineBam ]; then
 					familyLineBam=$bamFileToAdd
 				else
