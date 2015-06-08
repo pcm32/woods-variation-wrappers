@@ -110,11 +110,6 @@ Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1;ID2;ID
 -r	CrossRefs reference cut-off (optional, required when using -c )
 "
 
-if [ -z $1 ]; then
-	echo "$USAGEMSG"
-	exit 1
-fi
-
 if ! [ -z $SETP ]
 then
 	if [ "$SETP" == "1" ]
@@ -167,7 +162,8 @@ function checkFileExistanceExit {
 if [ -z $IDENTIFIERS ]
 then
 	echo "ERROR: Missing identifiers option (-i)"
-	echo "Run without arguments for help" 
+	echo ""
+        echo "$USAGEMSG"	
 	exit 1
 else
 	# check that file exists and produce INPUTFILELIST in the temp
@@ -185,7 +181,7 @@ else
 		do
 			if [[ $family =~ $reIndWithinFamSep ]]
 			then
-				for inFamily in $(echo $family | tr ",")
+				for inFamily in $(echo $family | tr "," "\n")
 				do
 					fileToAdd=$ANNOTATED_VCFS_PATH/$inFamily".annot.tab"
 					checkFileExistanceExit $fileToAdd $inFamily
