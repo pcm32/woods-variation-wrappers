@@ -204,10 +204,10 @@ else
 					fi
 
 				done
-				echo $familyLine >> $INPUTLIST
+				echo -e $familyLine >> $INPUTLIST
 				unset familyLine
 				if ! [ -z $familyLineBam ]; then
-					echo $familyLineBam >> $BAMINPUTLIST
+					echo -e $familyLineBam >> $BAMINPUTLIST
 					unset familyLineBam
 				fi
 
@@ -250,10 +250,10 @@ else
 				fi
 			fi
 		done
-		echo $familyLine >> $INPUTLIST
+		echo -e $familyLine >> $INPUTLIST
 		unset familyLine
 		if ! [ -z $familyLineBam ]; then
-			echo $familyLineBam >> $BAMINPUTLIST
+			echo -e $familyLineBam >> $BAMINPUTLIST
 			unset familyLineBam
 		fi
 	fi
