@@ -10,7 +10,7 @@ Usage: dataFormatting.sh identifier
 	If only the first file is present, then the variant effect predictor is run only on this file. The script will detect whether 
 	the VCF was created with a different version of the human assembly/annotation than hg19, and run lift over if necessary.
 
-	All jobs are sent to the cluster. Log files with info an any errors will be lest at:
+	All jobs are sent to the cluster. Log files with info an any errors will be left at:
 
 	$OLD_VCFS_PATH/<identifier>.data.format.log.{1,2,3}
 
