@@ -185,7 +185,7 @@ else
 				do
 					fileToAdd=$ANNOTATED_VCFS_PATH/$inFamily".annot.tab"
 					checkFileExistanceExit $fileToAdd $inFamily
-					if ! [ -z $familyLine ]
+					if [ -z $familyLine ]
 					then
 						familyLine=$fileToAdd
 					else
@@ -196,7 +196,7 @@ else
 						baiFile=$BAMPATHS/$inFamily".bai"
 						checkFileExistanceExit $bamFileToAdd $inFamily
 						checkFileExistanceExit $baiFile $inFamily
-						if ! [ -z $familyLineBam ]; then
+						if [ -z $familyLineBam ]; then
 							familyLineBam=$bamFileToAdd
 						else
 							familyLineBam=$familyLineBam"\t"$bamFileToAdd
@@ -206,7 +206,7 @@ else
 				done
 				echo $familyLine >> $INPUTLIST
 				unset familyLine
-				if [ -z $familyLineBam ]; then
+				if ! [ -z $familyLineBam ]; then
 					echo $familyLineBam >> $BAMINPUTLIST
 					unset familyLineBam
 				fi
@@ -232,7 +232,7 @@ else
 		do
 			fileToAdd=$ANNOTATED_VCFS_PATH/$inFamily".annot.tab"
 			checkFileExistanceExit $fileToAdd $inFamily	
-			if ! [ -z $familyLine ]; then
+			if [ -z $familyLine ]; then
 				familyLine=$fileToAdd
 			else
 				familyLine=$familyLine"\t"$fileToAdd
@@ -243,7 +243,7 @@ else
 				baiFile=$BAMPATHS/$inFamily".bai"
 				checkFileExistanceExit $bamFileToAdd $inFamily
 				checkFileExistanceExit $baiFile $inFamily
-				if ! [ -z $familyLineBam ]; then
+				if [ -z $familyLineBam ]; then
 					familyLineBam=$bamFileToAdd
 				else
 					familyLineBam=$familyLineBam"\t"$bamFileToAdd
@@ -252,7 +252,7 @@ else
 		done
 		echo $familyLine >> $INPUTLIST
 		unset familyLine
-		if [ -z $familyLineBam ]; then
+		if ! [ -z $familyLineBam ]; then
 			echo $familyLineBam >> $BAMINPUTLIST
 			unset familyLineBam
 		fi
