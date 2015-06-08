@@ -193,7 +193,7 @@ else
 					fi
 					if [ $useBAMs ]; then
 						bamFileToAdd=$BAMSPATH/$inFamily".bam"
-						baiFile=$BAMSPATH/$inFamily".bai"
+						baiFile=$BAMSPATH/$inFamily".bam.bai"
 						checkFileExistanceExit $bamFileToAdd $inFamily
 						checkFileExistanceExit $baiFile $inFamily
 						if [ -z $familyLineBam ]; then
@@ -219,7 +219,7 @@ else
 
 				if [ $useBAMs ]; then
 					bamFileToAdd=$BAMSPATH/$inFamily".bam"
-					baiFile=$BAMSPATH/$inFamily".bai"
+					baiFile=$BAMSPATH/$inFamily".bam.bai"
 					checkFileExistanceExit $bamFileToAdd $inFamily
 					checkFileExistanceExit $baiFile $inFamily
 					echo $bamFileToAdd >> $BAMINPUTLIST
@@ -240,7 +240,7 @@ else
 
 			if [ $useBAMs ]; then
 				bamFileToAdd=$BAMSPATH/$inFamily".bam"
-				baiFile=$BAMSPATH/$inFamily".bai"
+				baiFile=$BAMSPATH/$inFamily".bam.bai"
 				checkFileExistanceExit $bamFileToAdd $inFamily
 				checkFileExistanceExit $baiFile $inFamily
 				if [ -z $familyLineBam ]; then
