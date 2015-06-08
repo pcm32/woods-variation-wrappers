@@ -9,6 +9,7 @@ WRAPPERDIR=/data/woods/variation-wrappers
 OLD_VCFS_PATH=/data/woods/Old_VCFs
 VEP_DIR=$OLD_VCFS_PATH/variant_effect_predictor
 FORMATTING_TOOLS_PATH=$OLD_VCFS_PATH/Formatting_Tools
+FORMATTINGTEMP=/results/woods/DataFormattingTemp
 ANNOTATED_VCFS_PATH=/data/woods/Annotated_VCFs
 
 GENEFILTERPATH=/data/woods/GeneFilter
