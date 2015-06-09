@@ -22,6 +22,7 @@ MUTFILTXREFsDIR=$ANNOTATED_VCFS_PATH/Cross_Reference
 RUNJOBSPATH=/data/woods/runJobs
 CASECONTROLRESPATH=/results/woods/CaseControl
 CASECONTROLPATH=/data/woods/CaseControl
+CASECONTROLTEMP=/results/woods/CaseControl
 
 BAMSPATH=/data/woods/Bam_Files
 TOUGHMUMSRESULTS=/results/woods/ToughMums

@@ -168,9 +168,10 @@ PRESEED=`sha256sum $INPUTLIST | awk '{ print $1 }' | base64 | rev | head -c5`
 SEED=$PRESEED`date +%s`
 GROUPID=`echo $SEED | sha256sum | base64 | rev | head -c10; echo`
 
-mkdir -p $RUNJOBSPATH
+TEMP=$CASECONTROLTEMP/caseControl_$GROUPID
+mkdir -p $TEMP
 
-UNAFFDEST=$RUNJOBSPATH/unaffected_$GROUPID.txt
+UNAFFDEST=$TEMP/unaffected.txt
 touch $UNAFFDEST
 
 # write unaffected exomes file for script
@@ -206,9 +207,11 @@ echo "rm $UNAFFDEST" >> $RUNFFILTEREXEC
 
 echo "Submitting further filtering job $GROUPID to the cluster"
 cat $RUNFFILTEREXEC
+echo "Temporary and log files will be in $TEMP"
+echo "Results can be found in $OUTPATH/$OUTFILENAME*"
 
 chmod u+x $RUNFFILTEREXEC
 
-qsub -q short -d $RUNJOBSPATH $RUNFFILTEREXEC
+qsub -q short -d $TEMP $RUNFFILTEREXEC
 
 
