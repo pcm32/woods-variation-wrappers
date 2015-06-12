@@ -50,7 +50,7 @@ done
 
 
 USAGEMSG="
-Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1;ID2;ID3] -p \"-r -c=0 -ref /data/woods/..\"
+Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1:ID2:ID3] -p \"-r -c=0 -ref /data/woods/..\"
 	-o outputFilePrefix
 
 
@@ -80,8 +80,10 @@ Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1;ID2;ID
 	Files will be expected to be in $BAMSPATH/<identifier>.bam and $BAMSPATH/<identifier>.bam.bai
 	The script will check that files exists.
 
--e	Exon Read (optional, required when using -b)
-
+-e	Exon Read (optional, required when using -b) 
+	
+	This is the threshold (bigger or equal to) for finding mutations that are not present in all affected 
+	individuals because the mutation was not sequenced.
 	
 -c	Cross reference identifiers (optional)
 
