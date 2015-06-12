@@ -58,7 +58,7 @@ Usage: furtherFiltering.sh -i <initialFilteringFilePath> [-u ID1:ID2:ID3] [-m mo
 	$ANNOTATED_VCFS_PATH/<id>.annot.tab, so you need to make sure that those files exist. The script 
 	checks for existance, and will warn if they are missing. 
 
-	For instance -u 1;4;7 would make the program expect the following files to be in place:
+	For instance -u 1:4:7 would make the program expect the following files to be in place:
 
 	$ANNOTATED_VCFS_PATH/1.annot.tab
 	$ANNOTATED_VCFS_PATH/4.annot.tab
