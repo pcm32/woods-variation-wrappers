@@ -50,8 +50,8 @@ done
 
 
 USAGEMSG="
-Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1:ID2:ID3] -p \"-r -c=0 -ref /data/woods/..\"
-	-o outputFilePrefix
+Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1:ID2:ID3] [-p \"-r -c=0 -ref /data/woods/..\"]
+	[-o outputFilePrefix] [-s <caseChoice>] [-r   
 
 
 -i	Identifiers of individuals to work on. Individuals from the same family are separated by a \",\",
@@ -84,6 +84,8 @@ Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1:ID2:ID
 	
 	This is the threshold (bigger or equal to) for finding mutations that are not present in all affected 
 	individuals because the mutation was not sequenced.
+
+	Number of individuals of those available in the bam file paths where the mutation must occur at least.
 	
 -c	Cross reference identifiers (optional)
 
@@ -91,8 +93,6 @@ Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1:ID2:ID
 	$ANNOTATED_VCFS_PATH/<id>.annot.tab, so you need to make sure that those files exist. The script 
 	checks for existance, and will warn if they are missing. The script will add the -ref part to
 	the parameters line.
-
-	Number of individuals of those available in the bam file paths where the mutation must occur at least.	
 
 -p	Parameters line
 
@@ -110,6 +110,9 @@ Usage: filtering.sh -i <identifiers> [-b -e minSubjectsExonReads] [-c ID1:ID2:ID
 		\"4\" : Only use filters of inheritance pattern, mutation type, and SNP frequency.
 
 -r	CrossRefs reference cut-off (optional, required when using -c )
+
+	Cut-off number of individuals in Cross References in which the mutation must be found before being
+	eliminated from the candidate list.
 "
 
 if ! [ -z $SETP ]
