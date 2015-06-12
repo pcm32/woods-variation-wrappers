@@ -45,7 +45,7 @@ done
 
 
 USAGEMSG="
-Usage: furtherFiltering.sh -i <initialFilteringFilePath> [-u ID1;ID2;ID3] [-m mother_identifier] [-d father_identifier] [-f family_index] -p inheritancePattern -o output_path
+Usage: furtherFiltering.sh -i <initialFilteringFilePath> [-u ID1:ID2:ID3] [-m mother_identifier] [-d father_identifier] [-f family_index] -p inheritancePattern -o output_path
 
 
 -i	Input file
@@ -54,7 +54,7 @@ Usage: furtherFiltering.sh -i <initialFilteringFilePath> [-u ID1;ID2;ID3] [-m mo
 
 -u	Unaffected individuals Identifiers (optional)
 
-	A semi colon separated list of identifiers for unaffected individuals. The identifiers are expanded to
+	A colon separated list of identifiers for unaffected individuals. The identifiers are expanded to
 	$ANNOTATED_VCFS_PATH/<id>.annot.tab, so you need to make sure that those files exist. The script 
 	checks for existance, and will warn if they are missing. 
 
@@ -178,7 +178,7 @@ touch $UNAFFDEST
 UNAFFECTED_INPUT=""
 if ! [ -z $UNAFFECTEDIDS ]
 then
-	unafIDs=$(echo $UNAFFECTEDIDS | tr ";" "\n")
+	unafIDs=$(echo $UNAFFECTEDIDS | tr ":" "\n")
 
 	for xref in $unafIDs
 	do
