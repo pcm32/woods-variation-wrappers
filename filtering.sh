@@ -358,7 +358,7 @@ echo "About to send job to the cluster..."
 echo "For your records, this is job execution $GROUPID"
 echo "The execution script for this job is: $RUNFILTEREXEC"
 echo "This file will include all settings used."
-echo "The result file should be found here: $OUTFILE"
+#echo "The result file should be found here: $OUTFILE"
 echo "THe temporary directory for errors and info is $FILTERINGTEMP"
 
 qsub -q $LONGQUEUE -d $FILTERINGTEMP $RUNFILTEREXEC
