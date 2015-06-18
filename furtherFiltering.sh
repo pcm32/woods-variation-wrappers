@@ -45,12 +45,12 @@ done
 
 
 USAGEMSG="
-Usage: furtherFiltering.sh -i <initialFilteringFilePath> [-u ID1:ID2:ID3] [-m mother_identifier] [-d father_identifier] [-f family_index] -p inheritancePattern -o output_path
+Usage: furtherFiltering.sh -i <initialFilteringFileCompletePath> [-u ID1:ID2:ID3] [-m mother_identifier] [-d father_identifier] [-f family_index] -p inheritancePattern -o output_path
 
 
 -i	Input file
 
-	This should be the file produced by calling the filtering.sh routine.
+	This should be the file produced by calling the filtering.sh routine. This is a full/complete path.
 
 -u	Unaffected individuals Identifiers (optional)
 
@@ -110,7 +110,7 @@ then
 		exit 1
 	fi
 
-	$MOTHERINPUT="--mother=$ANNOTATED_VCFS_PATH/$MOTHERID.annot.tab"
+	MOTHERINPUT="--mother=$ANNOTATED_VCFS_PATH/$MOTHERID.annot.tab"
 fi
 
 FATHERINPUT=""
@@ -123,7 +123,7 @@ then
 		exit 1
 	fi
 
-	$FATHERINPUT="--father=$ANNOTATED_VCFS_PATH/$FATHERID.annot.tab"
+	FATHERINPUT="--father=$ANNOTATED_VCFS_PATH/$FATHERID.annot.tab"
 fi
 
 if [ -z $FAMILYINDEX ]
