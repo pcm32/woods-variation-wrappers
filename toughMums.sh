@@ -181,11 +181,6 @@ do
 	echo $ANNOTATED_VCFS_PATH/$ident.annot.tab >> $IDENTIFIERS_DEST
 
 	if [ $useBAMs ]; then
-		bamFileToAdd=$BAMSPATH/$inFamily".bam"
-		baiFile=$BAMSPATH/$inFamily".bam.bai"
-		checkFileExistanceExit $bamFileToAdd $inFamily
-		checkFileExistanceExit $baiFile $inFamily
-
 		if ! [[ -e $BAMSPATH/$ident.bam  && -e $BAMSPATH/$ident.bam.bai ]]
 		then
 			echo "Missing BAM file or BAM index (.bam.bai) for indentifier $ident in $BAMSPATH"
