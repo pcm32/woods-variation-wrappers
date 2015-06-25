@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO multiple hypothesis testing should be default
+# TODO add exome variant server queries.
+
 source settings.sh
 
 while [[ $# > 1 ]]
@@ -115,22 +118,11 @@ if ! [[ $FEMALESCOUNT =~ $re ]] ; then
    exit 1
 fi
 
+source functions.sh
 
+# calling this should set $GROUPID
+computeGroupID $IDENTIFIERS
 
-PRESEED=`echo $IDENTIFIERS | sha256sum | awk '{ print $1 }' | base64 | rev | head -c5`
-SEED=$PRESEED`date +%s`
-GROUPID=`echo $SEED | sha256sum | base64 | rev | head -c10; echo`
-
-function checkFileExistanceExit {
-	fileToCheck=$1
-	idOfFile=$2
-	if ! [ -e $fileToCheck ]
-	then
-		echo "Could not find file for ID $idOfFile $fileToCheck"
-		echo "Exiting"
-		exit 1
-	fi
-}
 
 if [ -z $OUTFILE ]
 then
