@@ -30,12 +30,11 @@ case $key in
     OUTFILE="$2"
     shift
     ;;
+    -x|--bed)
+    UseBED=0
+    ;;
     -p|--processors)
     PROCS="$2"
-    shift
-    ;;
-    -x|--bed)
-    USEBED="$2"
     shift
     ;;
 
@@ -77,9 +76,11 @@ Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesC
 
 -o	(optional) Out file path. Defaults to $TOUGHMUMSRESULTS/<groupID>_toughmums_out.txt
 
--p	Number of processors to use on the cluster node. Defaults to 4.
+-p	(optional) Number of processors to use on the cluster node. Defaults to 4. Used for BAM processing, so giving
+	more processors than BAM files will have no effect beyond the number of BAM files. Too many concurrent 
+	processes might produce too much disk stress, running slower. 
 
--x      Add string to use bedtools, this should be a flag but is not.
+-x      (optional) Use bedtools flag, replaces BED/BAM handling implemented previously by BEDtools arithmetics (faster).
 "
 
 if [ -z $IDENTIFIERS ]
@@ -236,10 +237,10 @@ if [ $useBAMs ]; then
 checkpoint=\`date +%s\`
 parallel --gnu -P $PROCS '
 	NAME=\$(basename {} .annot.tab)
-	useBed=$USEBED
+	useBed=$useBED
 	# we should include generateLocationsToCheck in the repo, and modify it to produce a bed file
 	# of the locations already sorted (NAME.locs.txt)
-	if ! [ -z \$useBed ]
+	if [ \$useBed ]
 	then
 	  perl $TOUGHMUMSPATHSC/generateLocationsToCheck.pl {} $OUTFILE bedfile | sed \"s/^chrM\\(\\s\\)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/\\(^chrGL\\S+\\)_random/\\1/\" | sed \"s/\\(^chrGL\\S+\\)/\\1\\.1/\" | sort -u -k 1,1 -k2,2n > $TOUGHMUMSTEMP/\$NAME.locs.bed
   	else
@@ -258,8 +259,8 @@ echo \"Seconds taken : \"\$((checkpoint2-checkpoint)) 1>&2
 #do
 parallel --gnu -P $PROCS '
         NAME=\$(basename {} .bam)
-	useBed=$USEBED
-	if ! [ -z \$useBed ]
+	useBed=$useBED
+	if [ \$useBed ]
 	then
 	  bamToBed -i {} | sed \"s/^chrM\\(\\s\\)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/\\(^chrGL\\S+\\)_random/\\1/\" | sed \"s/\\(^chrGL\\S+\\)/\\1\\.1/\" | sort -k1,1 -k2,2n | intersectBed -a $TOUGHMUMSTEMP/\$NAME.locs.bed -b stdin -v -sorted | awk '\\''{ print \$1\":\"(\$2+1) }'\\'' > $TOUGHMUMSTEMP/\$NAME.unsequenced.txt
           # we add one to the coordinate at the end to move from 0-based nucleotide index in bam/bed to 1-based nucleotide based used by the existing scripts 
