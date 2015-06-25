@@ -49,8 +49,8 @@ done
 USAGEMSG="
 Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesCount [-c] [-o <outputFilePath>] -p numProcessors --bed
 
--i	Identifiers, id1;id2;idN, where each of these are expected to be found in the $ANNOTATED_VCFS_PATH/id1.annot.tab
-	Alternatively, if too many identifiers are to be given, or they require zero padding, brace expansion can be used.
+-i	Identifiers, \"{id1,id2,{id3..idN}}\", where each of these are expected to be found in the $ANNOTATED_VCFS_PATH/id1.annot.tab
+	This uses shell brace expansion to list/enumerate identifiers.
 	Documentation for brace expansion can be found here http://wiki.bash-hackers.org/syntax/expansion/brace.
 
 	For instance, for all ids from 1 to 100, but skipping numbers 54 and 56, you would issue
