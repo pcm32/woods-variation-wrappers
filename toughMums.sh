@@ -11,9 +11,8 @@ case $key in
     IDENTIFIERS="$2"
     shift 
     ;;   
-    -b|--bamIdentifiers)
-    BAMIDS="$2"
-    shift
+    -b|--useBAMs)
+    useBAMs=0
     ;;
     -c|--runCorrection) 
     RUNCORRECTION=1
@@ -64,9 +63,9 @@ Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesC
 
 	For brace expansion, the identifiers string needs to be quoted or double quoted.
 
--b	(optional) BAM file identifiers bid1;bid2;bidN, these BAM identifiers should be given in the same order as in the
-	option -i, as they correspond to subjects given in that option. As such, the number of identifiers in both cases 
-	should be the same. This is required for the Location Coverage Checking feature.
+-b	(optional) Flag Use BAM files for same identifiers as provided in -i
+	Files will be expected to be in $BAMSPATH/<identifier>.bam and $BAMSPATH/<identifier>.bam.bai
+	The script will check that files exists.
 
 	For this option, brace expansion (as explained for option -i) can be used as well.
 
@@ -121,6 +120,17 @@ PRESEED=`echo $IDENTIFIERS | sha256sum | awk '{ print $1 }' | base64 | rev | hea
 SEED=$PRESEED`date +%s`
 GROUPID=`echo $SEED | sha256sum | base64 | rev | head -c10; echo`
 
+function checkFileExistanceExit {
+	fileToCheck=$1
+	idOfFile=$2
+	if ! [ -e $fileToCheck ]
+	then
+		echo "Could not find file for ID $idOfFile $fileToCheck"
+		echo "Exiting"
+		exit 1
+	fi
+}
+
 if [ -z $OUTFILE ]
 then
 	echo "Missing outfile definition"
@@ -150,6 +160,13 @@ TOTALINDIVIDUALS=${#identsArray[@]}
 IDENTIFIERS_DEST=$TOUGHMUMSTEMP/identifiers_tm_$GROUPID.txt
 touch $IDENTIFIERS_DEST
 
+BAMIDENTS_DEST=""
+if [ $useBAMs ]; then
+	BAMIDENTS_DEST=$TOUGHMUMSTEMP/bam_identifiers_tm_$GROUPID.txt
+	touch $BAMIDENTS_DEST
+fi
+
+
 for ident in "${identsArray[@]}"
 do
 	if ! [ -e $ANNOTATED_VCFS_PATH/$ident.annot.tab ]
@@ -161,6 +178,24 @@ do
 	fi
         echo "ID "$ident
 	echo $ANNOTATED_VCFS_PATH/$ident.annot.tab >> $IDENTIFIERS_DEST
+
+	if [ $useBAMs ]; then
+		bamFileToAdd=$BAMSPATH/$inFamily".bam"
+		baiFile=$BAMSPATH/$inFamily".bam.bai"
+		checkFileExistanceExit $bamFileToAdd $inFamily
+		checkFileExistanceExit $baiFile $inFamily
+
+		if ! [[ -e $BAMSPATH/$ident.bam  && -e $BAMSPATH/$ident.bam.bai ]]
+		then
+			echo "Missing BAM file or BAM index (.bam.bai) for indentifier $ident in $BAMSPATH"
+			rm $BAMIDENTS_DEST
+			rm $IDENTIFIERS_DEST
+			exit 1
+		fi
+
+		echo $BAMSPATH/$ident.bam >> $BAMIDENTS_DEST
+
+	fi
 
 done
 
@@ -176,47 +211,11 @@ then
 fi
 
 QUEUE=$SHORTQUEUE
-BAMIDENTS_DEST=""
-
-echo "BAMIDS "$BAMIDS
-if ! [ -z $BAMIDS ]
-then
-	if [[ $BAMIDS =~ $reBrace ]]; then
-		IFS=' ' read -a identsBAMArray <<< `eval echo $BAMIDS`
-	else
-		IFS=';' read -a identsBAMArray <<< "$BAMIDS"
-	fi
-	#QUEUE=$LONGQUEUE
-
-	if [ "$TOTALINDIVIDUALS" -ne "${#identsBAMArray[@]}" ]
-	then
-		echo "Number of BAM ids provided ${#identsBAMArray[@]} is different to the number of individuals (identifiers) provided $TOTALINDIVIDUALS"
-		exit 1
-	fi
-
-	BAMIDENTS_DEST=$TOUGHMUMSTEMP/bam_identifiers_tm_$GROUPID.txt
-	touch $BAMIDENTS_DEST
-
-
-	for bamID in "${identsBAMArray[@]}"
-	do
-		if ! [[ -e $BAMSPATH/$bamID.bam  && -e $BAMSPATH/$bamID.bam.bai ]]
-		then
-			echo "Missing BAM file or BAM index (.bam.bai) for indentifier $bamID in $BAMSPATH"
-			rm $BAMIDENTS_DEST
-			rm $IDENTIFIERS_DEST
-			exit 1
-		fi
-
-		echo $BAMSPATH/$bamID.bam >> $BAMIDENTS_DEST
-	done
-fi
 
 TOUGHMUMSEXEC=$RUNJOBSPATH"/toughMums_"$GROUPID".sh"
 touch $TOUGHMUMSEXEC
 
-if ! [ -z $BAMIDS ]
-then
+if [ $useBAMs ]; then
 	echo "#PBS -l walltime=08:00:00" >> $TOUGHMUMSEXEC
         echo "#PBS -l nodes=1:ppn=$PROCS" >> $TOUGHMUMSEXEC
 fi
@@ -229,8 +228,7 @@ echo "bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/cohortCounts.t
 echo "echo \"Done compareAllChromosomes.sh\" 1>&2" >> $TOUGHMUMSEXEC
 
 
-if ! [ -z $BAMIDS ]
-then
+if [ $useBAMs ]; then
 	echo "IFS=\$'\\n' read -d '' -r -a lines < $IDENTIFIERS_DEST" >> $TOUGHMUMSEXEC
 	echo "IFS=\$'\\n' read -d '' -r -a bamLines < $BAMIDENTS_DEST" >> $TOUGHMUMSEXEC
 	FORPART="
