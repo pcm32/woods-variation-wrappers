@@ -94,12 +94,14 @@ for ident in "${identsArray[@]}"; do
 	fi
 	
 	echo "perl findMutationsinGene.pl $ANNOTATED_VCFS_PATH/$IDENTIFIER.annot.tab $QUERYGENESFILE > $GENEFILTERRESPATH/$IDENTIFIER.mutations.txt" >> $MUTEXEC
-	echo "rm $MUTEXEC" >> $MUTEXEC
-	echo "#" >> $MUTEXEC
+	
 
 	echo $GENEFILTERRESPATH/$IDENTIFIER.mutations.txt
 
 done	
+
+echo "rm $MUTEXEC" >> $MUTEXEC
+echo "#" >> $MUTEXEC
 
 echo ""
 echo "Sending findMutationsGene.pl job to cluster:"
