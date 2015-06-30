@@ -18,8 +18,7 @@ case $key in
     useBAMs=0
     ;;
     -c|--runCorrection) 
-    RUNCORRECTION=1
-    shift    
+    RUNCORRECTION=0
     ;;
     -f|--femalesCount)
     FEMALESCOUNT="$2"
@@ -274,6 +273,12 @@ rm $TOUGHMUMSTEMP/namesOfUnsequencedLocFiles.txt
 "
 
 	echo "$FORPART" >> $TOUGHMUMSEXEC
+fi
+
+if [ $RUNCORRECTION ]; then
+	echo "Scheduling multiple hypothesis testing correction run"
+	echo "perl $TOUGHMUMSPATH/formatOutput.pl $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
+	echo "perl $TOUGHMUMSTEMP/formatOutput.pl $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
 fi
 
 echo "Submitting job $GROUPID to cluster"
