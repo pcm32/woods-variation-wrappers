@@ -283,6 +283,16 @@ fi
 
 echo "Submitting job $GROUPID to cluster"
 echo "Intermediate files can be found in $TOUGHMUMSTEMP"
+echo "Results will be in:"
+echo $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out.txt
+echo $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out.txt
+
+if [ $RUNCORRECTION ]; then
+	for postfix in _SIG_Lacking.txt _SIG_Abundant.txt; do
+		echo $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out$postfix
+		echo $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out$postfix
+	done
+fi
 
 chmod u+x $TOUGHMUMSEXEC
 qsub -d $TOUGHMUMSTEMP -q $QUEUE $TOUGHMUMSEXEC
