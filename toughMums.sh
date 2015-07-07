@@ -1,7 +1,15 @@
 #!/bin/bash
 
-# TODO multiple hypothesis testing should be default
-# TODO add exome variant server queries.
+# TODO DONE multiple hypothesis testing should be default
+# TODO add exome variant server queries. We want the alternate (rare) allele frequency in the exome variant data.
+# TODO From exome variant server: MAF=0.4767,0.0454,0.3306 - minor allele freq for 3 ethnic groups: european americans, afro-americans, everything. We want the first. 
+# TODO add option for queue, which should be enforced when not running with bam files
+# TODO check 111-118, 120-143, 145-171 to find offending files. Perl script issues a message telling that the file handle is closed, for some of these files. Try to produce a descriptive error for this.
+# TODO Final result should only contain significant variants, that are either significant due to the 1000 genomes background or the exome variant server background. This include both over-represented and under-represented alleles.
+# TODO get rid of the following effects: non-coding, misense, non-sense (stop), frame-shift, splice acceptor, splice donor, insertions, deletions. Keep the rest.
+# TODO summarize lines by position/variation change, adding 
+# TODO get rid of codon_pos, clinical_sig, canonical_transcript, GERP, PHYLOP100
+# TODO add p-value (the actual value), bonferroni-adjusted, fdr-adjusted (both for 1000 genomes & exome variant server)
 
 source settings.sh
 
@@ -208,6 +216,22 @@ echo "echo \"Done getCohortCounts.pl\" 1>&2" >> $TOUGHMUMSEXEC
 echo "cd $TOUGHMUMSPATH" >> $TOUGHMUMSEXEC
 echo "bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/cohortCounts.txt $OUTFILE $FEMALESCOUNT $MALESCOUNT" >> $TOUGHMUMSEXEC
 echo "echo \"Done compareAllChromosomes.sh\" 1>&2" >> $TOUGHMUMSEXEC
+
+# for tabix search
+TABIXINPUT=$TOUGHMUMSTEMP/forTabixQuery.txt
+echo "tail -n +2 $OUTFILE | awk -F'\t' '{ print $1, $2 }' | sort -u > $TABIXINPUT" >> $TOUGHMUMSEXEC
+TABIXEXECPART="
+source $PYTHONENVS/htslib/bin/activate
+# Run tabix search using python wrappers
+parallel --gnu -P $PROCS '
+	CHROM={}
+	grep \"^\$CHROM \" | $HTSLIBPYTHONPATH/runTabixSearch.py $EXOMEVARIANTPATH/$EXOMEVARIANTPREFIX\$CHROM$EXOMEVARIANTPOSTFIX > $TOUGHMUMSTEMP/tabix_search_\$CHROM\_result.txt
+       ' ::: `seq 1 22` X Y	
+cat $TOUGHMUMSTEMP/tabix_search_1_result.txt > $TOUGHMUMSTEMP/tabix_complete_results.txt
+cat $TOUGHMUMSTEMP/tabix_search_* | grep -v \"^Chrom\" >> $TOUGHMUMSTEMP/tabix_complete_results.txt
+rm $TOUGHMUMSTEMP/tabix_search_*
+deactivate
+"
 
 
 if [ $useBAMs ]; then
