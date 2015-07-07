@@ -278,7 +278,7 @@ fi
 if [ $RUNCORRECTION ]; then
 	echo "Scheduling multiple hypothesis testing correction run"
 	echo "perl $TOUGHMUMSPATH/formatOutput.pl $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
-	echo "perl $TOUGHMUMSTEMP/formatOutput.pl $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
+	echo "perl $TOUGHMUMSPATH/formatOutput.pl $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
 fi
 
 echo "Submitting job $GROUPID to cluster"
