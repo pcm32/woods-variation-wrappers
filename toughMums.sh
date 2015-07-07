@@ -17,9 +17,6 @@ case $key in
     -b|--useBAMs)
     useBAMs=0
     ;;
-    -c|--runCorrection) 
-    RUNCORRECTION=0
-    ;;
     -f|--femalesCount)
     FEMALESCOUNT="$2"
     shift
@@ -73,8 +70,6 @@ Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesC
 -f	Females count : the number of females. A non negative integer.
 
 -m	Males count   : the number of males. A non negative integer.
-
--c	Flag to activate the multiple hypothesis testing correction.
 
 -o	(optional) Out file path. Defaults to $TOUGHMUMSRESULTS/<groupID>_toughmums_out.txt
 
@@ -275,11 +270,9 @@ rm $TOUGHMUMSTEMP/namesOfUnsequencedLocFiles.txt
 	echo "$FORPART" >> $TOUGHMUMSEXEC
 fi
 
-if [ $RUNCORRECTION ]; then
-	echo "Scheduling multiple hypothesis testing correction run"
-	echo "perl $TOUGHMUMSPATH/formatOutput.pl $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
-	echo "perl $TOUGHMUMSPATH/formatOutput.pl $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
-fi
+echo "Scheduling multiple hypothesis testing correction run"
+echo "perl $TOUGHMUMSPATH/formatOutput.pl $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
+echo "perl $TOUGHMUMSPATH/formatOutput.pl $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
 
 echo "Submitting job $GROUPID to cluster"
 echo "Intermediate files can be found in $TOUGHMUMSTEMP"
@@ -287,12 +280,11 @@ echo "Results will be in:"
 echo $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out.txt
 echo $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out.txt
 
-if [ $RUNCORRECTION ]; then
-	for postfix in _SIG_Lacking.txt _SIG_Abundant.txt; do
-		echo $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out$postfix
-		echo $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out$postfix
-	done
-fi
+for postfix in _SIG_Lacking.txt _SIG_Abundant.txt; do
+	echo $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out$postfix
+	echo $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out$postfix
+done
+
 
 chmod u+x $TOUGHMUMSEXEC
 qsub -d $TOUGHMUMSTEMP -q $QUEUE $TOUGHMUMSEXEC
