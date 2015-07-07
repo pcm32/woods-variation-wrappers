@@ -13,8 +13,10 @@ if __name__ == '__main__':
 
     tabix_querier = TabixQuery(sys.argv[1])
 
+    print "\t".join(["Chrom", "Pos", "Reference", "Alternate", "MAF_EuropeanAmerican"])+"\n"
     for line in fileinput.input():
         chrom, position = line.split(sep=" ")
         for vcfEntry in tabix_querier.query(chrom,position):
             match = re.search('MAF=([0\.]{0,2}\d+),([0\.]{0,2}\d+),([0\.]{0,2}\d+);', vcfEntry.info)
             print "\t".join([vcfEntry.chrom, vcfEntry.pos, vcfEntry.reference, vcfEntry.alt, match.group(1)])+"\n"
+            
