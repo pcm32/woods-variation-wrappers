@@ -38,7 +38,7 @@ case $key in
     shift
     ;;
     -x|--bed)
-    UseBED=0
+    useBED=0
     ;;
     -p|--processors)
     PROCS="$2"
