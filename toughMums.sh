@@ -225,9 +225,9 @@ source $PYTHONENVS/htslib/bin/activate
 # Run tabix search using python wrappers
 parallel --gnu -P $PROCS '
 	CHROM={}
-	grep \"^\$CHROM \" | $HTSLIBPYTHONPATH/runTabixSearch.py $EXOMEVARIANTPATH/$EXOMEVARIANTPREFIX\$CHROM$EXOMEVARIANTPOSTFIX > $TOUGHMUMSTEMP/tabix_search_\$CHROM\_result.txt
+	grep \"^\$CHROM \" $TABIXINPUT | $HTSLIBPYTHONPATH/runTabixSearch.py $EXOMEVARIANTPATH/$EXOMEVARIANTPREFIX\$CHROM$EXOMEVARIANTPOSTFIX > $TOUGHMUMSTEMP/tabix_search_\$CHROM\_result.txt
        ' ::: `seq 1 22` X Y	
-cat $TOUGHMUMSTEMP/tabix_search_1_result.txt > $TOUGHMUMSTEMP/tabix_complete_results.txt
+head -n 1 $TOUGHMUMSTEMP/tabix_search_1_result.txt > $TOUGHMUMSTEMP/tabix_complete_results.txt
 cat $TOUGHMUMSTEMP/tabix_search_* | grep -v \"^Chrom\" >> $TOUGHMUMSTEMP/tabix_complete_results.txt
 rm $TOUGHMUMSTEMP/tabix_search_*
 deactivate
