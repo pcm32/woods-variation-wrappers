@@ -4,7 +4,8 @@ from pysam import TabixFile
 
 class VCFEntry(object):
 
-    def __init__(self, pysam_tabix_tuple):
+    def __init__(self, pysam_tabix_row):
+        pysam_tabix_tuple = pysam_tabix_row.split('\t')
         self.chrom = pysam_tabix_tuple[0]
         self.pos = pysam_tabix_tuple[1]
         self.id = pysam_tabix_tuple[2]
