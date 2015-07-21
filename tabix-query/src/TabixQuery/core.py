@@ -5,14 +5,14 @@ from pysam import TabixFile
 class VCFEntry(object):
 
     def __init__(self, pysam_tabix_tuple):
-        self.chrom = pysam_tabix_tuple[1]
-        self.pos = pysam_tabix_tuple[2]
-        self.id = pysam_tabix_tuple[3]
-        self.reference = pysam_tabix_tuple[4]
-        self.alt = pysam_tabix_tuple[5]
-        self.qual = pysam_tabix_tuple[6]
-        self.filter = pysam_tabix_tuple[7]
-        self.info = pysam_tabix_tuple[8]
+        self.chrom = pysam_tabix_tuple[0]
+        self.pos = pysam_tabix_tuple[1]
+        self.id = pysam_tabix_tuple[2]
+        self.reference = pysam_tabix_tuple[3]
+        self.alt = pysam_tabix_tuple[4]
+        self.qual = pysam_tabix_tuple[5]
+        self.filter = pysam_tabix_tuple[6]
+        self.info = pysam_tabix_tuple[7]
 
 
 
