@@ -17,5 +17,4 @@ if __name__ == '__main__':
         chrom, position = line.split()
         for vcfEntry in tabix_querier.query(chrom,int(position),int(position)+1):
             match = re.search('MAF=([0\.]{0,2}\d+),([0\.]{0,2}\d+),([0\.]{0,2}\d+);', vcfEntry.info)
-            if match is not None:
-                print "\t".join([str(vcfEntry.chrom), str(vcfEntry.pos), vcfEntry.reference, vcfEntry.alt, str(match.group(1))])+"\n"
+            print "\t".join([str(vcfEntry.chrom), str(vcfEntry.pos), vcfEntry.reference, vcfEntry.alt, str(match.group(1))])
