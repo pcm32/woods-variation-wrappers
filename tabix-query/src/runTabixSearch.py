@@ -15,6 +15,6 @@ if __name__ == '__main__':
     print "\t".join(["Chrom", "Pos", "Reference", "Alternate", "MAF_EuropeanAmerican"])+"\n"
     for line in sys.stdin:
         chrom, position = line.split()
-        for vcfEntry in tabix_querier.query(chrom,position):
+        for vcfEntry in tabix_querier.query(chrom,int(position),int(position)+1):
             match = re.search('MAF=([0\.]{0,2}\d+),([0\.]{0,2}\d+),([0\.]{0,2}\d+);', vcfEntry.info)
             print "\t".join([str(vcfEntry.chrom), str(vcfEntry.pos), vcfEntry.reference, vcfEntry.alt, str(match.group(1))])+"\n"

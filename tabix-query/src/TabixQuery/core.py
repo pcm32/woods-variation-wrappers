@@ -31,5 +31,5 @@ class TabixQuery(object):
             vcfEntries.append(VCFEntry(row))
         return vcfEntries
 
-    def query(self, chrom, start):
+    def __query(self, chrom, start):
         return self.query(chrom,start,start+1)
