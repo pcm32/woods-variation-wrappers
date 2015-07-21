@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
     tabix_querier = TabixQuery(sys.argv[1])
 
-    print "\t".join(["Chrom", "Pos", "Reference", "Alternate", "MAF_EuropeanAmerican"])+"\n"
+    print "\t".join(["Chrom", "Pos", "Reference", "Alternate", "MAF_EuropeanAmerican"])
     for line in sys.stdin:
         chrom, position = line.split()
         for vcfEntry in tabix_querier.query(chrom,int(position),int(position)+1):
