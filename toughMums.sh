@@ -213,19 +213,27 @@ fi
 echo "source $WRAPPERDIR/settings.sh" >> $TOUGHMUMSEXEC
 echo "perl $TOUGHMUMSPATH/getCohortCounts.pl $IDENTIFIERS_DEST > $TOUGHMUMSTEMP/cohortCounts.txt" >> $TOUGHMUMSEXEC
 echo "echo \"Done getCohortCounts.pl\" 1>&2" >> $TOUGHMUMSEXEC
+########
+#
+# This part should only be executed once the tabix, thousand genomes and bam files have been used
+#
 echo "cd $TOUGHMUMSPATH" >> $TOUGHMUMSEXEC
 echo "bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/cohortCounts.txt $OUTFILE $FEMALESCOUNT $MALESCOUNT" >> $TOUGHMUMSEXEC
 echo "echo \"Done compareAllChromosomes.sh\" 1>&2" >> $TOUGHMUMSEXEC
+#
+#
+#
+########
 
 # for tabix search
 TABIXINPUT=$TOUGHMUMSTEMP/forTabixQuery.txt
-echo "tail -n +2 $OUTFILE | awk -F'\t' '{ print $1, $2 }' | sort -u > $TABIXINPUT" >> $TOUGHMUMSEXEC
+echo "tail -n +2 $TOUGHMUMSEXEC/cohortCounts.txt | awk -F'\t' '{ print \$1, \$2 }' | sort -u > $TABIXINPUT" >> $TOUGHMUMSEXEC
 TABIXEXECPART="
 source $PYTHONENVS/htslib/bin/activate
 # Run tabix search using python wrappers
 parallel --gnu -P $PROCS '
 	CHROM={}
-	grep \"^\$CHROM \" $TABIXINPUT | $HTSLIBPYTHONPATH/runTabixSearch.py $EXOMEVARIANTPATH/$EXOMEVARIANTPREFIX\$CHROM$EXOMEVARIANTPOSTFIX > $TOUGHMUMSTEMP/tabix_search_\$CHROM\_result.txt
+	grep \"^\$CHROM \" $TABIXINPUT | python $HTSLIBPYTHONPATH/runTabixSearch.py $EXOMEVARIANTPATH/$EXOMEVARIANTPREFIX\$CHROM$EXOMEVARIANTPOSTFIX > $TOUGHMUMSTEMP/tabix_search_\$CHROM\_result.txt
        ' ::: `seq 1 22` X Y	
 head -n 1 $TOUGHMUMSTEMP/tabix_search_1_result.txt > $TOUGHMUMSTEMP/tabix_complete_results.txt
 cat $TOUGHMUMSTEMP/tabix_search_* | grep -v \"^Chrom\" >> $TOUGHMUMSTEMP/tabix_complete_results.txt
@@ -247,7 +255,13 @@ parallel --gnu -P $PROCS '
 	# of the locations already sorted (NAME.locs.txt)
 	if [ \$useBed ]
 	then
-	  perl $TOUGHMUMSPATHSC/generateLocationsToCheck.pl {} $OUTFILE bedfile | sed \"s/^chrM\\(\\s\\)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/\\(^chrGL\\S+\\)_random/\\1/\" | sed \"s/\\(^chrGL\\S+\\)/\\1\\.1/\" | sort -u -k 1,1 -k2,2n > $TOUGHMUMSTEMP/\$NAME.locs.bed
+	  # We need to generate a BED file with locations that are relevant to the cohort 
+	  # (an allele seen on at least one patient) to check on the BAM files for each different patient/sample.		# Avoiding the OUTFILE, as the process generating it should only be run at the end, not before and after.
+	  # A position needs to be checked on a BAM file of a sample iff the VCF file for that sample 
+	  # doesn't show an allele different to the reference for it. For this we use the cohort counts and the
+	  # VCF of the sample, if it is in the cohort count file and it is not in the VCF, then we need to to check
+	  # whether it has the reference allele on the BAM file or if it wasn't sequenced for any reason. 
+	  perl $TOUGHMUMSPATHSC/generateLocationsToCheck.pl {} $TOUGHMUMSEXEC/cohortCounts.txt bedfile | sed \"s/^chrM\\(\\s\\)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/\\(^chrGL\\S+\\)_random/\\1/\" | sed \"s/\\(^chrGL\\S+\\)/\\1\\.1/\" | sort -u -k 1,1 -k2,2n > $TOUGHMUMSTEMP/\$NAME.locs.bed
   	else
 	  perl $TOUGHMUMSPATH/generateLocationsToCheck.pl {} $OUTFILE > $TOUGHMUMSTEMP/\$NAME.locs.txt
 	  sort $TOUGHMUMSTEMP/\$NAME.locs.txt | uniq > $TOUGHMUMSTEMP/\$NAME\"_sortRes\"
