@@ -227,7 +227,7 @@ echo "echo \"Done compareAllChromosomes.sh\" 1>&2" >> $TOUGHMUMSEXEC
 
 # for tabix search
 TABIXINPUT=$TOUGHMUMSTEMP/forTabixQuery.txt
-echo "tail -n +2 $TOUGHMUMSEXEC/cohortCounts.txt | awk -F'\t' '{ print \$1, \$2 }' | sort -u > $TABIXINPUT" >> $TOUGHMUMSEXEC
+echo "tail -n +2 $TOUGHMUMSTEMP/cohortCounts.txt | awk -F'\t' '{ print \$1, \$2 }' | sort -u > $TABIXINPUT" >> $TOUGHMUMSEXEC
 TABIXEXECPART="
 source $PYTHONENVS/htslib/bin/activate
 # Run tabix search using python wrappers
@@ -261,7 +261,7 @@ parallel --gnu -P $PROCS '
 	  # doesn't show an allele different to the reference for it. For this we use the cohort counts and the
 	  # VCF of the sample, if it is in the cohort count file and it is not in the VCF, then we need to to check
 	  # whether it has the reference allele on the BAM file or if it wasn't sequenced for any reason. 
-	  perl $TOUGHMUMSPATHSC/generateLocationsToCheck.pl {} $TOUGHMUMSEXEC/cohortCounts.txt bedfile | sed \"s/^chrM\\(\\s\\)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/\\(^chrGL\\S+\\)_random/\\1/\" | sed \"s/\\(^chrGL\\S+\\)/\\1\\.1/\" | sort -u -k 1,1 -k2,2n > $TOUGHMUMSTEMP/\$NAME.locs.bed
+	  perl $TOUGHMUMSPATHSC/generateLocationsToCheck.pl {} $TOUGHMUMSTEMP/cohortCounts.txt bedfile | sed \"s/^chrM\\(\\s\\)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/\\(^chrGL\\S+\\)_random/\\1/\" | sed \"s/\\(^chrGL\\S+\\)/\\1\\.1/\" | sort -u -k 1,1 -k2,2n > $TOUGHMUMSTEMP/\$NAME.locs.bed
   	else
 	  perl $TOUGHMUMSPATH/generateLocationsToCheck.pl {} $OUTFILE > $TOUGHMUMSTEMP/\$NAME.locs.txt
 	  sort $TOUGHMUMSTEMP/\$NAME.locs.txt | uniq > $TOUGHMUMSTEMP/\$NAME\"_sortRes\"
@@ -293,13 +293,22 @@ echo \"Done reads_only_locs\" 1>&2
 checkpoint3=\`date +%s\`
 echo \"Seconds taken : \"\$((checkpoint3-checkpoint2)) 1>&2
 
+
+
+# We replace now the previous frequency part counts and compare all chromosomes with a single R script which merges all the data
+
+cat $TOUGHMUMSTEMP/*.unsequenced.txt | grep '^chr' | sed \"s/chr//\" | tr \":\" \"\\t\" > $TOUGHMUMSTEMP/all.unseq.txt
+
+Rscript $TOUGHMUMSDATAMERGEPATH/mergeData.R -c $TOUGHMUMSTEMP/cohortCounts.txt -t $TOUGHMUMSTEMP/tabix_complete_results.txt -f $FEMALESCOUNT -m $MALESCOUNT -r $REF1000GENOMESPATH/1000Gsnps_all_chrom.txt -u $TOUGHMUMSTEMP/all.unseq.txt -o $TOUGHMUMSTEMP/final_result
+
+
 # update frequency counts 
 # Original counts denote lower bounds on frequencies because assumes all locations not in file are those corresponding to ref alleles
-perl $TOUGHMUMSPATH/updateCounts.pl $TOUGHMUMSTEMP/namesOfUnsequencedLocFiles.txt $TOUGHMUMSTEMP/cohortCounts.txt > $TOUGHMUMSTEMP/newCohortCounts.txt
-echo \"Done updateCounts.pl\" 1>&2
-cd $TOUGHMUMSPATH
-bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/newCohortCounts.txt $OUTFILE_DIR/UpperBounds_$OUTFILE_BASENAME $FEMALESCOUNT $MALESCOUNT
-echo \"Done compareAllChromosomes\" 1>&2
+#perl $TOUGHMUMSPATH/updateCounts.pl $TOUGHMUMSTEMP/namesOfUnsequencedLocFiles.txt $TOUGHMUMSTEMP/cohortCounts.txt > $TOUGHMUMSTEMP/newCohortCounts.txt
+#echo \"Done updateCounts.pl\" 1>&2
+#cd $TOUGHMUMSPATH
+#bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/newCohortCounts.txt $OUTFILE_DIR/UpperBounds_$OUTFILE_BASENAME $FEMALESCOUNT $MALESCOUNT
+echo \"Done merging\" 1>&2
 checkpoint4=\`date +%s\`
 echo \"Seconds taken (update and compare): \"\$((checkpoint4-checkpoint3)) 1>&2
 rm $TOUGHMUMSTEMP/namesOfUnsequencedLocFiles.txt
@@ -308,20 +317,24 @@ rm $TOUGHMUMSTEMP/namesOfUnsequencedLocFiles.txt
 	echo "$FORPART" >> $TOUGHMUMSEXEC
 fi
 
-echo "Scheduling multiple hypothesis testing correction run"
-echo "perl $TOUGHMUMSPATH/formatOutput.pl $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
-echo "perl $TOUGHMUMSPATH/formatOutput.pl $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
+# use this to generate output of unsequenced for R:
+# cat *.unsequenced.txt | grep '^chr' | sed 's/chr//' | tr ':' '\t' > all.unseq.txt
+
+# This is now part of the R script which does both bonferroni and FDR correction.
+#echo "Scheduling multiple hypothesis testing correction run"
+#echo "perl $TOUGHMUMSPATH/formatOutput.pl $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
+#echo "perl $TOUGHMUMSPATH/formatOutput.pl $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out.txt" >> $TOUGHMUMSEXEC
 
 echo "Submitting job $GROUPID to cluster"
 echo "Intermediate files can be found in $TOUGHMUMSTEMP"
 echo "Results will be in:"
 echo $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out.txt
-echo $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out.txt
+#echo $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out.txt
 
-for postfix in _SIG_Lacking.txt _SIG_Abundant.txt; do
-	echo $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out$postfix
-	echo $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out$postfix
-done
+#for postfix in _SIG_Lacking.txt _SIG_Abundant.txt; do
+#	echo $TOUGHMUMSRESULTS/$GROUPID\_toughmums_out$postfix
+#	echo $TOUGHMUMSRESULTS/UpperBounds_$GROUPID\_toughmums_out$postfix
+#done
 
 
 chmod u+x $TOUGHMUMSEXEC

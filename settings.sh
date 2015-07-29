@@ -28,6 +28,8 @@ BAMSPATH=/data/woods/Bam_Files
 TOUGHMUMSRESULTS=/results/woods/ToughMums
 TOUGHMUMSPATH=/data/woods/ToughMums
 TOUGHMUMSPATHSC=$WRAPPERDIR/ToughMumsScripts
+TOUGHMUMSDATAMERGEPATH=$TOUGHMUMSPATHSC/ToughMumsDataMerge
+REF1000GENOMESPATH=$TOUGHMUMSPATH/1000G
 
 EXOMEVARIANTPATH=/data/woods/data/ExomeVariantServer
 EXOMEVARIANTPREFIX=ESP6500SI-V2-SSA137.GRCh38-liftover.chr
@@ -35,4 +37,4 @@ EXOMEVARIANTPOSTFIX=.snps_indels.vcf.gz
 HTSLIBPYTHONPATH=/data/woods/variation-wrappers/tabix-query/src
 PYTHONENVS=/data/woods/python_envs
 
-PATH=/shared/software/bedtools-2.24.0/bin:$PATH
+PATH=/shared/software/bedtools-2.24.0/bin:/shared/software/R-3.1.2/bin:$PATH
