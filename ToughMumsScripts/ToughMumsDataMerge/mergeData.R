@@ -7,7 +7,7 @@ options_list<-list(
   make_option(c("--tabixResult","-t"),help="full path to tabix processed result"),
   make_option(c("--femaleCount","-f"),help="Number of females"),
   make_option(c("--maleCount","-m"),help="Number of males"),
-  make_option(c("--ref1000GPath","-r"),help="Path to 1000 Genomes reference file")
+  make_option(c("--ref1000GPath","-r"),help="Path to 1000 Genomes reference file"),
   make_option(c("--bamUnseqResult","-u"),help="Path to file with the file names containing the positions that are not sequenced per sample"),
 )
 
