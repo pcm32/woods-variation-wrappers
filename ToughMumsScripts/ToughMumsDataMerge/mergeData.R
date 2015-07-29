@@ -16,7 +16,7 @@ opt<-parse_args(OptionParser(option_list = options_list),positional_arguments = 
 # we index all tables by a new column: chr-position-allele
 # cohort columns: Chromosome      Position        Observed_Allele Allele_Count    Assumed_Total_Alleles
 fread(opt$cohortCounts)->cohortCounts
-cohortCounts[,Assumed_Total_Alleles:=opt$femaleCount+opt$maleCount,]
+cohortCounts[,Assumed_Total_Alleles:=2*(opt$femaleCount+opt$maleCount),]
 cohortCounts[Chromosome=="Y",Assumed_Total_Alleles:=opt$maleCount,]
 cohortCounts[,Other_Alleles_Count:=Assumed_Total_Alleles-Allele_Count,]
 cohortCounts[,AlleleKey:=paste(Chromosome,Position,Observed_Allele,sep="_"),]
