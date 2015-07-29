@@ -5,10 +5,10 @@ options_list<-list(
   make_option(c("--cohortCounts","-c"),help="cohorts count file",),
   make_option(c("--output","-o"),help="ouput full path name"),
   make_option(c("--tabixResult","-t"),help="full path to tabix processed result"),
-  make_option(c("--femaleCount","-f"),help="Number of females"),
-  make_option(c("--maleCount","-m"),help="Number of males"),
+  make_option(c("--femaleCount","-f"),help="Number of females",type="integer"),
+  make_option(c("--maleCount","-m"),help="Number of males",type="integer"),
   make_option(c("--ref1000GPath","-r"),help="Path to 1000 Genomes reference file"),
-  make_option(c("--bamUnseqResult","-u"),help="Path to file with the file names containing the positions that are not sequenced per sample"),
+  make_option(c("--bamUnseqResult","-u"),help="Path to file with the file names containing the positions that are not sequenced per sample")
 )
 
 opt<-parse_args(OptionParser(option_list = options_list),positional_arguments = FALSE)
