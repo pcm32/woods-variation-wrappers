@@ -13,7 +13,7 @@
 
 source settings.sh
 
-while [[ $# > 1 ]]
+while [[ "$#" -ge 1 ]]
 do
 key="$1"
 
@@ -258,9 +258,9 @@ parallel --gnu -P $PROCS '
 	  # We need to generate a BED file with locations that are relevant to the cohort 
 	  # (an allele seen on at least one patient) to check on the BAM files for each different patient/sample.		# Avoiding the OUTFILE, as the process generating it should only be run at the end, not before and after.
 	  # A position needs to be checked on a BAM file of a sample iff the VCF file for that sample 
-	  # doesn't show an allele different to the reference for it. For this we use the cohort counts and the
+	  # does not show an allele different to the reference for it. For this we use the cohort counts and the
 	  # VCF of the sample, if it is in the cohort count file and it is not in the VCF, then we need to to check
-	  # whether it has the reference allele on the BAM file or if it wasn't sequenced for any reason. 
+	  # whether it has the reference allele on the BAM file or if it was not sequenced for any reason. 
 	  perl $TOUGHMUMSPATHSC/generateLocationsToCheck.pl {} $TOUGHMUMSTEMP/cohortCounts.txt bedfile | sed \"s/^chrM\\(\\s\\)/chrMT\\1/\" | sed \"s/^chr\\S+gl/chrGL/\" | sed \"s/\\(^chrGL\\S+\\)_random/\\1/\" | sed \"s/\\(^chrGL\\S+\\)/\\1\\.1/\" | sort -u -k 1,1 -k2,2n > $TOUGHMUMSTEMP/\$NAME.locs.bed
   	else
 	  perl $TOUGHMUMSPATH/generateLocationsToCheck.pl {} $OUTFILE > $TOUGHMUMSTEMP/\$NAME.locs.txt
