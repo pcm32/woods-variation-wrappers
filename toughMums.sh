@@ -240,7 +240,7 @@ cat $TOUGHMUMSTEMP/tabix_search_* | grep -v \"^Chrom\" >> $TOUGHMUMSTEMP/tabix_c
 rm $TOUGHMUMSTEMP/tabix_search_*
 deactivate
 "
-
+echo "$TABIXEXECPART" >> $TOUGHMUMSEXEC
 
 if [ $useBAMs ]; then
 	echo "IFS=\$'\\n' read -d '' -r -a lines < $IDENTIFIERS_DEST" >> $TOUGHMUMSEXEC
