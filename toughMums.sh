@@ -218,8 +218,11 @@ echo "echo \"Done getCohortCounts.pl\" 1>&2" >> $TOUGHMUMSEXEC
 # This part should only be executed once the tabix, thousand genomes and bam files have been used
 #
 echo "cd $TOUGHMUMSPATH" >> $TOUGHMUMSEXEC
-echo "bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/cohortCounts.txt $OUTFILE $FEMALESCOUNT $MALESCOUNT" >> $TOUGHMUMSEXEC
-echo "echo \"Done compareAllChromosomes.sh\" 1>&2" >> $TOUGHMUMSEXEC
+
+if ! [ $useBED ]; then
+	echo "bash $TOUGHMUMSPATH/compareAllChromosomes.sh $TOUGHMUMSTEMP/cohortCounts.txt $OUTFILE $FEMALESCOUNT $MALESCOUNT" >> $TOUGHMUMSEXEC
+	echo "echo \"Done compareAllChromosomes.sh\" 1>&2" >> $TOUGHMUMSEXEC
+fi
 #
 #
 #
