@@ -82,8 +82,8 @@ if("bamUnseqResult" %in% names(opt)) {
     setkeyv(cohortCounts,c('Chromosome','Position'))
     bamUnseqs[cohortCounts]->cohortCounts
     cohortCounts[is.na(notSequencedIn),notSequencedIn:=0,]
-    cohortCounts[,Assumed_Total_Alleles:=Assumed_Total_Alleles-notSequencedIn,]
-    cohortCounts[,Other_Alleles_Count:=Other_Alleles_Count-notSequencedIn,]
+    cohortCounts[,Assumed_Total_Alleles:=Assumed_Total_Alleles-2*notSequencedIn,]
+    cohortCounts[,Other_Alleles_Count:=Other_Alleles_Count-2*notSequencedIn,]
 }
 
 if("ref1000GPath" %in% names(opt)) {
