@@ -81,7 +81,7 @@ Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesC
 
 -o	(optional) Out file path. Defaults to $TOUGHMUMSRESULTS/<groupID>_toughmums_out.txt
 
--p	(optional) Number of processors to use on the cluster node. Defaults to 4. Used for BAM processing, so giving
+-p	(optional) Number of processors to use on the cluster node. Defaults to 6. Used for BAM processing, so giving
 	more processors than BAM files will have no effect beyond the number of BAM files. Too many concurrent 
 	processes might produce too much disk stress, running slower. 
 
@@ -135,8 +135,11 @@ fi
 
 if [ -z $PROCS ]
 then
-	PROCS=4
+	PROCS=6
 fi
+
+PROCPERNODE=$(($PROCS>8?24:$(($PROCS*3))))
+echo "Using $PROCPERNODE processors on the node for $PROCS independent multi-threads"
 
 OUTFILE_BASENAME=`basename $OUTFILE`
 OUTFILE_DIR=`dirname $OUTFILE`
@@ -207,7 +210,7 @@ touch $TOUGHMUMSEXEC
 
 if [ $useBAMs ]; then
 	echo "#PBS -l walltime=08:00:00" >> $TOUGHMUMSEXEC
-        echo "#PBS -l nodes=1:ppn=$PROCS" >> $TOUGHMUMSEXEC
+        echo "#PBS -l nodes=1:ppn=$PROCPERNODE" >> $TOUGHMUMSEXEC
 fi
 
 echo "source $WRAPPERDIR/settings.sh" >> $TOUGHMUMSEXEC
