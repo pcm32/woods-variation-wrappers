@@ -32,7 +32,11 @@ case $key in
     -m|--malesCount)
     MALESCOUNT="$2"
     shift
-    ;; 
+    ;;
+    -r|--memory)
+    MEMORYREQUEST="$2"
+    shift
+    ;;
     -o|--outputFile)
     OUTFILE="$2"
     shift
@@ -81,9 +85,11 @@ Usage: toughMums.sh -i identifiers [-b bamIdentifiers] -f femalesCount -m malesC
 
 -o	(optional) Out file path. Defaults to $TOUGHMUMSRESULTS/<groupID>_toughmums_out.txt
 
--p	(optional) Number of processors to use on the cluster node. Defaults to 6. Used for BAM processing, so giving
-	more processors than BAM files will have no effect beyond the number of BAM files. Too many concurrent 
-	processes might produce too much disk stress, running slower. 
+-p	(optional) Number of parallel threads to use on the cluster node. Defaults to 6. Used for BAM processing, 
+	so giving more processors than BAM files will have no effect beyond the number of BAM files. Too many 
+	concurrent processes might produce too much disk stress, running slower. 
+
+-r	(optional) Request this amount of RAM (in Gigabytes, whole number).
 
 -x      (optional) Use bedtools flag, replaces BED/BAM handling implemented previously by BEDtools arithmetics (faster).
 "
@@ -136,6 +142,13 @@ fi
 if [ -z $PROCS ]
 then
 	PROCS=6
+fi
+
+MEMORYPART=""
+if ! [ -z $MEMORYREQUEST ]
+then
+	MEMORYPART=":mem="$MEMORYREQUEST"gb"
+	echo "Requesting $MEMORYREQUEST GB of Ram"
 fi
 
 PROCPERNODE=$(($PROCS>8?24:$(($PROCS*3))))
@@ -210,7 +223,7 @@ touch $TOUGHMUMSEXEC
 
 if [ $useBAMs ]; then
 	echo "#PBS -l walltime=08:00:00" >> $TOUGHMUMSEXEC
-        echo "#PBS -l nodes=1:ppn=$PROCPERNODE" >> $TOUGHMUMSEXEC
+        echo "#PBS -l nodes=1"$MEMORYPART":ppn=$PROCPERNODE" >> $TOUGHMUMSEXEC
 fi
 
 echo "source $WRAPPERDIR/settings.sh" >> $TOUGHMUMSEXEC
