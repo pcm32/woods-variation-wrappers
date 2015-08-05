@@ -147,7 +147,7 @@ fi
 MEMORYPART=""
 if ! [ -z $MEMORYREQUEST ]
 then
-	MEMORYPART=":mem="$MEMORYREQUEST"gb"
+	MEMORYPART="mem="$MEMORYREQUEST"gb:"
 	echo "Requesting $MEMORYREQUEST GB of Ram"
 fi
 
@@ -223,7 +223,7 @@ touch $TOUGHMUMSEXEC
 
 if [ $useBAMs ]; then
 	echo "#PBS -l walltime=08:00:00" >> $TOUGHMUMSEXEC
-        echo "#PBS -l nodes=1"$MEMORYPART":ppn=$PROCPERNODE" >> $TOUGHMUMSEXEC
+        echo "#PBS -l "$MEMORYPART"nodes=1:ppn=$PROCPERNODE" >> $TOUGHMUMSEXEC
 fi
 
 echo "source $WRAPPERDIR/settings.sh" >> $TOUGHMUMSEXEC
