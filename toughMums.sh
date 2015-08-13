@@ -253,7 +253,7 @@ source $PYTHONENVS/htslib/bin/activate
 parallel --gnu -P $PROCS '
 	CHROM={}
 	grep \"^\$CHROM \" $TABIXINPUT | python $HTSLIBPYTHONPATH/runTabixSearch.py $EXOMEVARIANTPATH/$EXOMEVARIANTPREFIX\$CHROM$EXOMEVARIANTPOSTFIX > $TOUGHMUMSTEMP/tabix_search_\$CHROM\_result.txt
-       ' ::: `seq 1 22` X Y	
+       ' ::: \`seq 1 22\` X Y	
 head -n 1 $TOUGHMUMSTEMP/tabix_search_1_result.txt > $TOUGHMUMSTEMP/tabix_complete_results.txt
 cat $TOUGHMUMSTEMP/tabix_search_* | grep -v \"^Chrom\" >> $TOUGHMUMSTEMP/tabix_complete_results.txt
 rm $TOUGHMUMSTEMP/tabix_search_*
