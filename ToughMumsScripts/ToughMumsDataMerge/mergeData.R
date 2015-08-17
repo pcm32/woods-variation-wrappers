@@ -71,7 +71,7 @@ if("tabixResult" %in% names(opt)) {
     setkey(exomeVariant_short,AlleleKey)
     
     exomeVariant_short[cohortCounts,allow.cartesian=TRUE]->cohortCounts
-    cohortsCounts[MAF_EuropeanAmerican>0,Allele_Count_EA_Others_EVS:=Allele_Count_EA_EVS/MAF_EuropeanAmerican,by=AlleleKey]
+    cohortCounts[MAF_EuropeanAmerican>0,Allele_Count_EA_Others_EVS:=Allele_Count_EA_EVS/MAF_EuropeanAmerican,by=AlleleKey]
 }
 
 if("bamUnseqResult" %in% names(opt)) {
