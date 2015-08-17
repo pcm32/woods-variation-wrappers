@@ -67,11 +67,11 @@ if("ref1000GPath" %in% names(opt)) {
 if("tabixResult" %in% names(opt)) {
     fread(opt$tabixResult)->exomeVariantTabixRes
     exomeVariantTabixRes[,AlleleKey:=paste(Chrom,Pos,Alternate,sep="_"),]
-    exomeVariantTabixRes[,list(AlleleKey,Reference_EVS=Reference,MAF_EuropeanAmerican,Allele_Count_EA_EVS=EA_Alt_Count),]->exomeVariant_short
+    exomeVariantTabixRes[MAF_EuropeanAmerican>0,Allele_Count_EA_Others_EVS:=EA_Alt_Count/MAF_EuropeanAmerican,]
+    exomeVariantTabixRes[,list(AlleleKey,Reference_EVS=Reference,MAF_EuropeanAmerican,Allele_Count_EA_EVS=EA_Alt_Count,Allele_Count_EA_Others_EVS),]->exomeVariant_short
     setkey(exomeVariant_short,AlleleKey)
     
     exomeVariant_short[cohortCounts,allow.cartesian=TRUE]->cohortCounts
-    cohortCounts[MAF_EuropeanAmerican>0,Allele_Count_EA_Others_EVS:=Allele_Count_EA_EVS/MAF_EuropeanAmerican,by=AlleleKey]
 }
 
 if("bamUnseqResult" %in% names(opt)) {
@@ -87,6 +87,8 @@ if("bamUnseqResult" %in% names(opt)) {
     cohortCounts[,Other_Alleles_Count:=Other_Alleles_Count-2*notSequencedIn,]
 }
 
+cohortCounts[,Cohort_Allele_Frequency:=Allele_Count/Assumed_Total_Alleles,]
+
 if("ref1000GPath" %in% names(opt)) {
   cohortCounts[,c("p.value_Xsqr_1000G","stat_Xsqr_1000G")
                :=runChiSqrd(Allele_Count,Other_Alleles_Count,
@@ -94,7 +96,8 @@ if("ref1000GPath" %in% names(opt)) {
                ),by=AlleleKey]
   cohortCounts$adj_pvalue_bonferroni_1000G<-p.adjust(cohortCounts$p.value_Xsqr_1000G,method = "bonferroni")
   cohortCounts$adj_pvalue_fdr_1000G<-p.adjust(cohortCounts$p.value_Xsqr_1000G,method = "fdr")
-  
+  cohortCounts[Total_Alleles_1000G>0,Allele_Frequency_1000G:=Allele_Count_1000G/Total_Alleles_1000G,]
+  cohortCounts[!is.na(Allele_Frequency_1000G),OverAbundance_Cohort_1000G:=Cohort_Allele_Frequency/Allele_Frequency_1000G,]
 }
 
 if("tabixResult" %in% names(opt)) {
@@ -104,6 +107,8 @@ if("tabixResult" %in% names(opt)) {
                ),by=AlleleKey]
   cohortCounts$adj_pvalue_bonferroni_EA_EVS<-p.adjust(cohortCounts$p.value_Xsqr_EA_EVS,method = "bonferroni")
   cohortCounts$adj_pvalue_fdr_EA_EVS<-p.adjust(cohortCounts$p.value_Xsqr_EA_EVS,method = "fdr")
+  cohortCounts[!is.na(Allele_Count_EA_Others_EVS),Allele_Frequency_EA_EVS:=Allele_Count_EA_EVS/(Allele_Count_EA_EVS+Allele_Count_EA_Others_EVS),]
+  cohortCounts[!is.na(Allele_Frequency_EA_EVS) && Allele_Frequency_EA_EVS>0,OverAbundance_Cohort_EA_EVS:=Cohort_Allele_Frequency/Allele_Frequency_EA_EVS,]
 }
 
 # Chromosome    Position    Change    Cohort_Allele_Count    Cohort_Allele_Frequency    1000G_Allele_Count
@@ -117,21 +122,21 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
     Position,
     Change=paste(Ref_Allele_1000G,Observed_Allele,sep="->"),
     Cohort_Allele_Count=Allele_Count,
-    Cohort_Allele_Frequency=Allele_Count/Assumed_Total_Alleles,
+    Cohort_Allele_Frequency,
     Allele_Count_1000G,
-    Allele_Frequency_1000G=Allele_Count_1000G/Total_Alleles_1000G,
+    Allele_Frequency_1000G,
     stat_Xsqr_1000G,
     p.value_Xsqr_1000G,
     adj_pvalue_bonferroni_1000G,
     adj_pvalue_fdr_1000G,
-    OverAbundance_Cohort_1000G=(Allele_Count/Assumed_Total_Alleles)/(Allele_Count_1000G/Total_Alleles_1000G),
+    OverAbundance_Cohort_1000G,
     Allele_Count_EA_EVS,
-    Allele_Frequency_EA_EVS=Allele_Count_EA_EVS/(Allele_Count_EA_EVS+Allele_Count_EA_Others_EVS),
+    Allele_Frequency_EA_EVS,
     stat_Xsqr_EA_EVS,
     p.value_Xsqr_EA_EVS,
     adj_pvalue_bonferroni_EA_EVS,
     adj_pvalue_fdr_EA_EVS,
-    OverAbundance_Cohort_EA_EVS=(Allele_Count/Assumed_Total_Alleles)/(Allele_Count_EA_EVS/(Allele_Count_EA_EVS+Allele_Count_EA_Others_EVS)),
+    OverAbundance_Cohort_EA_EVS,
     Gene, Effect, cDNA_pos, Codon_pos, Protein_pos, AA_change, 
     Grantham_Score, dbsnp, PolyPhen, SIFT, Protein_Domain, Clinic_Sig, Canonical_Trans, 
     GERP, PHYLOP100, MAF_EuropeanAmerican 
@@ -158,14 +163,14 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
                 Position,
                 Change=paste(Ref_Allele_1000G,Observed_Allele,sep="->"),
                 Cohort_Allele_Count=Allele_Count,
-                Cohort_Allele_Frequency=Allele_Count/Assumed_Total_Alleles,
+                Cohort_Allele_Frequency,
                 Allele_Count_EA_EVS,
-                Allele_Frequency_EA_EVS=Allele_Count_EA_EVS/(Allele_Count_EA_EVS+Allele_Count_EA_Others_EVS),
+                Allele_Frequency_EA_EVS,
                 stat_Xsqr_EA_EVS,
                 p.value_Xsqr_EA_EVS,
                 adj_pvalue_bonferroni_EA_EVS,
                 adj_pvalue_fdr_EA_EVS,
-                OverAbundance_Cohort_EA_EVS=(Allele_Count/Assumed_Total_Alleles)/(Allele_Count_EA_EVS/(Allele_Count_EA_EVS+Allele_Count_EA_Others_EVS)),
+                OverAbundance_Cohort_EA_EVS,
                 MAF_EuropeanAmerican 
               ),])
 } else if("ref1000GPath" %in% names(opt) && !("tabixResult" %in% names(opt))) {
@@ -175,14 +180,14 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
                 Position,
                 Change=paste(Ref_Allele_1000G,Observed_Allele,sep="->"),
                 Cohort_Allele_Count=Allele_Count,
-                Cohort_Allele_Frequency=Allele_Count/Assumed_Total_Alleles,
+                Cohort_Allele_Frequency,
                 Allele_Count_1000G,
-                Allele_Frequency_1000G=Allele_Count_1000G/Total_Alleles_1000G,
+                Allele_Frequency_1000G,
                 stat_Xsqr_1000G,
                 p.value_Xsqr_1000G,
                 adj_pvalue_bonferroni_1000G,
                 adj_pvalue_fdr_1000G,
-                OverAbundance_Cohort_1000G=(Allele_Count/Assumed_Total_Alleles)/(Allele_Count_1000G/Total_Alleles_1000G),
+                OverAbundance_Cohort_1000G,
                 Gene, Effect, cDNA_pos, Codon_pos, Protein_pos, AA_change, 
                 Grantham_Score, dbsnp, PolyPhen, SIFT, Protein_Domain, Clinic_Sig, Canonical_Trans, 
                 GERP, PHYLOP100
@@ -193,7 +198,7 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
                 Position,
                 Change=paste(Ref_Allele_1000G,Observed_Allele,sep="->"),
                 Cohort_Allele_Count=Allele_Count,
-                Cohort_Allele_Frequency=Allele_Count/Assumed_Total_Alleles
+                Cohort_Allele_Frequency
               ),])
 } else {
   write.table(file = paste(opt$output,"alone.xls",sep="_"),sep = '\t', row.names = F, quote = F, 
@@ -202,6 +207,6 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
                 Position,
                 Change=paste("?->",Observed_Allele),
                 Cohort_Allele_Count=Allele_Count,
-                Cohort_Allele_Frequency=Allele_Count/Assumed_Total_Alleles,
+                Cohort_Allele_Frequency
               ),])
 }
