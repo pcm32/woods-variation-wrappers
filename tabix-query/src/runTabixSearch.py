@@ -16,7 +16,8 @@ if __name__ == '__main__':
     for line in sys.stdin:
         chrom, position = line.split()
         for vcfEntry in tabix_querier.query(chrom,int(position)-1,int(position)):
-            match = re.search('MAF=([0\.]{0,2}\d+),([0\.]{0,2}\d+),([0\.]{0,2}\d+);', vcfEntry.info)
+            #match = re.search('MAF=([0\.]{0,2}\d+),([0\.]{0,2}\d+),([0\.]{0,2}\d+);', vcfEntry.info)
+            match = re.search('MAF=(\d+\.\d+),(\d+\.\d+),(\d+\.\d+);', vcfEntry.info)
             maf = None
             if match is not None:
                 maf = match.group(1)
