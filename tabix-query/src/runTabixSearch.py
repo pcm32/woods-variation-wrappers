@@ -25,7 +25,7 @@ if __name__ == '__main__':
             alt_count = None
             ref_count = None
             if match is not None:
-                ref_count = match.group(1)
-                alt_count = match.group(2)
+                alt_count = match.group(1)
+                ref_count = match.group(2)
             print "\t".join([str(vcfEntry.chrom), str(vcfEntry.pos), vcfEntry.reference, vcfEntry.alt,
                              str(maf), str(ref_count), str(alt_count)])
