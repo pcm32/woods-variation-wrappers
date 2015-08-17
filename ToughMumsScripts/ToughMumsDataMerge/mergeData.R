@@ -13,6 +13,8 @@ options_list<-list(
 
 opt<-parse_args(OptionParser(option_list = options_list),positional_arguments = FALSE)
 
+t0<-system.time()
+
 # we index all tables by a new column: chr-position-allele
 # cohort columns: Chromosome      Position        Observed_Allele Allele_Count    Assumed_Total_Alleles
 fread(opt$cohortCounts)->cohortCounts
@@ -21,6 +23,9 @@ cohortCounts[Chromosome=="Y",Assumed_Total_Alleles:=opt$maleCount,]
 cohortCounts[,Other_Alleles_Count:=Assumed_Total_Alleles-Allele_Count,]
 cohortCounts[,AlleleKey:=paste(Chromosome,Position,Observed_Allele,sep="_"),]
 setkey(cohortCounts,AlleleKey)
+
+t1<-system.time()
+print(paste("Initial proc of cohortCounts :",t1-t0,sep=""))
 
 runChiSqrd<-function(cohortAllele,cohortOther,referenceAllele,referenceOther) {
   if(is.na(referenceAllele)) {
@@ -64,6 +69,9 @@ if("ref1000GPath" %in% names(opt)) {
     
 }
 
+t2<-system.time()
+print(paste("Initial processing of 1000G : ",t2-t1,sep=""))
+
 if("tabixResult" %in% names(opt)) {
     fread(opt$tabixResult)->exomeVariantTabixRes
     exomeVariantTabixRes[,AlleleKey:=paste(Chrom,Pos,Alternate,sep="_"),]
@@ -73,6 +81,9 @@ if("tabixResult" %in% names(opt)) {
     
     exomeVariant_short[cohortCounts,allow.cartesian=TRUE]->cohortCounts
 }
+
+t3<-system.time()
+print(paste("Initial processing of EVS : ",t3-t2,sep=""))
 
 if("bamUnseqResult" %in% names(opt)) {
     fread(opt$bamUnseqResult)->bamUnseqs
@@ -87,6 +98,9 @@ if("bamUnseqResult" %in% names(opt)) {
     cohortCounts[,Other_Alleles_Count:=Other_Alleles_Count-2*notSequencedIn,]
 }
 
+t4<-system.time()
+print(paste("Initial processing of BAMs unseq : ",t4-t3,sep=""))
+
 cohortCounts[,Cohort_Allele_Frequency:=Allele_Count/Assumed_Total_Alleles,]
 
 if("ref1000GPath" %in% names(opt)) {
@@ -100,6 +114,9 @@ if("ref1000GPath" %in% names(opt)) {
   cohortCounts[!is.na(Allele_Frequency_1000G),OverAbundance_Cohort_1000G:=Cohort_Allele_Frequency/Allele_Frequency_1000G,]
 }
 
+t5<-system.time()
+print(paste("Secondary proc of 1000G : ",t5-t4,sep=""))
+
 if("tabixResult" %in% names(opt)) {
   cohortCounts[MAF_EuropeanAmerican>0,c("p.value_Xsqr_EA_EVS","stat_Xsqr_EA_EVS")
                :=runChiSqrd(Allele_Count,Other_Alleles_Count,
@@ -110,6 +127,9 @@ if("tabixResult" %in% names(opt)) {
   cohortCounts[!is.na(Allele_Count_EA_Others_EVS),Allele_Frequency_EA_EVS:=Allele_Count_EA_EVS/(Allele_Count_EA_EVS+Allele_Count_EA_Others_EVS),]
   cohortCounts[!is.na(Allele_Frequency_EA_EVS) && Allele_Frequency_EA_EVS>0,OverAbundance_Cohort_EA_EVS:=Cohort_Allele_Frequency/Allele_Frequency_EA_EVS,]
 }
+
+t6<-system.time()
+print(paste("Secondary processing of EVS : ",t6-t5,sep=""))
 
 # Chromosome    Position    Change    Cohort_Allele_Count    Cohort_Allele_Frequency    1000G_Allele_Count
 # 1000G_Allele_Frequency    Chi-Squared_Statistic    P-Value    Bonferroni_Correction_0.05_Significance
