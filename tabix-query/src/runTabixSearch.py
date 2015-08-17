@@ -20,7 +20,7 @@ if __name__ == '__main__':
             match = re.search('MAF=(\d+\.\d+),(\d+\.\d+),(\d+\.\d+);', vcfEntry.info)
             maf = None
             if match is not None:
-                maf = match.group(1)
+                maf = float(match.group(1))/100
             match = re.search('EA_AC=(\d+),(\d+);', vcfEntry.info)
             alt_count = None
             ref_count = None
