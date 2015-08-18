@@ -28,7 +28,7 @@ t1<-Sys.time()
 print(paste("Initial proc of cohortCounts :",t1-t0,sep=""))
 
 runChiSqrd<-function(cohortAllele,cohortOther,referenceAllele,referenceOther) {
-  if(is.na(referenceAllele)) {
+  if(is.na(referenceAllele) || referenceAllele < 0 || is.na(referenceOther) || referenceOther < 0) {
     return(c(NA_real_,NA_real_))
   }
   Xsq<-chisq.test(as.table(rbind(c(cohortAllele,cohortOther),c(referenceAllele,referenceOther))))
