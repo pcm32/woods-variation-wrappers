@@ -49,21 +49,21 @@ if("ref1000GPath" %in% names(opt)) {
              new=c('cDNA_pos','Codon_pos','Protein_pos','AA_change','Grantham_score','Protein_Domain','Clinic_Sig','Canonical_Trans'))
     
     reference[,list(
-      Obs_Allele_1000G=unique(Observed_Allele)[1],
-      Allele_Count_1000G=unique(Allele_Count)[1],
-      Total_Alleles_1000G=unique(Total_Alleles)[1],
-      Gene=unique(Gene)[1],Ref_Allele_1000G=unique(Ref_Allele)[1],
-      cDNA_pos=unique(cDNA_pos)[1],
-      Codon_pos=unique(Codon_pos)[1],
-      Protein_pos=unique(Protein_pos)[1],
-      AA_change=unique(AA_change)[1],
-      Grantham_Score=unique(Grantham_score)[1],
+      Obs_Allele_1000G=Observed_Allele[1],
+      Allele_Count_1000G=Allele_Count[1],
+      Total_Alleles_1000G=Total_Alleles[1],
+      Gene=Gene[1],Ref_Allele_1000G=Ref_Allele[1],
+      cDNA_pos=cDNA_pos[1],
+      Codon_pos=Codon_pos[1],
+      Protein_pos=Protein_pos[1],
+      AA_change=AA_change[1],
+      Grantham_Score=Grantham_score[1],
       dbsnp=paste(unique(unlist(strsplit(dbsnp,split = ";"))),collapse = ";"), 
-      PolyPhen=unique(PolyPhen)[1],SIFT=unique(SIFT)[1],
+      PolyPhen=PolyPhen[1],SIFT=SIFT[1],
       Protein_Domain=paste(unique(unlist(strsplit(Protein_Domain,split='&'))),collapse = "&"),
       Clinic_Sig=paste(unique(Clinic_Sig),collapse="-"),
       Canonical_Trans=gsub(pattern = '(^-|-$)', replacement = "", x = paste(unique(Canonical_Trans),collapse="-")),
-      GERP=unique(GERP)[1],PHYLOP100=unique(PHYLOP100)[1]),
+      GERP=GERP[1],PHYLOP100=PHYLOP100[1]),
     by=c('AlleleKey','Effect')]->ref_short
     
     setkey(ref_short,AlleleKey)
