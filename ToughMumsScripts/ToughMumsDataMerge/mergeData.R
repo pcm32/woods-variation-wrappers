@@ -28,7 +28,10 @@ t1<-Sys.time()
 print(paste("Initial proc of cohortCounts :",t1-t0,sep=""))
 
 runChiSqrd<-function(cohortAllele,cohortOther,referenceAllele,referenceOther) {
-  if(is.na(referenceAllele) || referenceAllele < 0 || is.na(referenceOther) || referenceOther < 0) {
+  if(is.na(referenceAllele) || referenceAllele < 0 
+     || is.na(referenceOther) || referenceOther < 0
+     || is.na(cohortAllele) || cohortAllele < 0 
+     || is.na(cohortOther)  || cohortOther < 0) {
     return(c(NA_real_,NA_real_))
   }
   Xsq<-chisq.test(as.table(rbind(c(cohortAllele,cohortOther),c(referenceAllele,referenceOther))))
@@ -64,7 +67,7 @@ if("ref1000GPath" %in% names(opt)) {
       Clinic_Sig=paste(unique(Clinic_Sig),collapse="-"),
       Canonical_Trans=gsub(pattern = '(^-|-$)', replacement = "", x = paste(unique(Canonical_Trans),collapse="-")),
       GERP=GERP[1],PHYLOP100=PHYLOP100[1]),
-    by=c('AlleleKey','Effect')]->ref_short
+    by=.(AlleleKey,Effect)]->ref_short
     
     setkey(ref_short,AlleleKey)
     
@@ -108,13 +111,23 @@ print(paste("Initial processing of BAMs unseq : ",t4-t3,sep=""))
 
 cohortCounts[,Cohort_Allele_Frequency:=Allele_Count/Assumed_Total_Alleles,]
 
+setkey(cohortCounts,AlleleKey)
 if("ref1000GPath" %in% names(opt)) {
   cohortCounts[,c("p.value_Xsqr_1000G","stat_Xsqr_1000G")
                :=runChiSqrd(Allele_Count,Other_Alleles_Count,
                             Allele_Count_1000G,Total_Alleles_1000G-Allele_Count_1000G
                ),by=AlleleKey]
-  cohortCounts$adj_pvalue_bonferroni_1000G<-p.adjust(cohortCounts$p.value_Xsqr_1000G,method = "bonferroni")
-  cohortCounts$adj_pvalue_fdr_1000G<-p.adjust(cohortCounts$p.value_Xsqr_1000G,method = "fdr")
+  unique(cohortCounts[,.(Allele_Count,Other_Alleles_Count,
+                  Allele_Count_1000G,Total_Alleles_1000G),by=AlleleKey])->uniqueForPValues
+  setkey(uniqueForPValues,AlleleKey)
+  uniqueForPValues[,c("p.value_Xsqr_1000G","stat_Xsqr_1000G")
+                   :=runChiSqrd(Allele_Count,Other_Alleles_Count,
+                                Allele_Count_1000G,Total_Alleles_1000G-Allele_Count_1000G
+                   ),by=AlleleKey]
+  uniqueForPValues[,adj_pvalue_bonferroni_1000G:=p.adjust(p.value_Xsqr_1000G,method = "bonferroni"),]
+  uniqueForPValues[,adj_pvalue_fdr_1000G:=p.adjust(p.value_Xsqr_1000G,method = "fdr"),]
+  uniqueForPValues[,c('Allele_Count','Other_Alleles_Count','Allele_Count_1000G','Total_Alleles_1000G'):=NULL,]
+  uniqueForPValues[cohortCounts]->cohortCounts
   cohortCounts[Total_Alleles_1000G>0,Allele_Frequency_1000G:=Allele_Count_1000G/Total_Alleles_1000G,]
   cohortCounts[!is.na(Allele_Frequency_1000G),OverAbundance_Cohort_1000G:=Cohort_Allele_Frequency/Allele_Frequency_1000G,]
 }
@@ -123,14 +136,21 @@ t5<-Sys.time()
 print(paste("Secondary proc of 1000G : ",t5-t4,sep=""))
 
 if("tabixResult" %in% names(opt)) {
-  cohortCounts[MAF_EuropeanAmerican>0,c("p.value_Xsqr_EA_EVS","stat_Xsqr_EA_EVS")
-               :=runChiSqrd(Allele_Count,Other_Alleles_Count,
-                            Allele_Count_EA_EVS,Allele_Count_EA_Others_EVS
-               ),by=AlleleKey]
-  cohortCounts$adj_pvalue_bonferroni_EA_EVS<-p.adjust(cohortCounts$p.value_Xsqr_EA_EVS,method = "bonferroni")
-  cohortCounts$adj_pvalue_fdr_EA_EVS<-p.adjust(cohortCounts$p.value_Xsqr_EA_EVS,method = "fdr")
+  
+  unique(cohortCounts[,.(Allele_Count,Other_Alleles_Count,
+                         Allele_Count_EA_EVS,Allele_Count_EA_Others_EVS),by=AlleleKey])->uniqueForPValues
+  setkey(uniqueForPValues,AlleleKey)
+  uniqueForPValues[,c("p.value_Xsqr_EA_EVS","stat_Xsqr_EA_EVS")
+                   :=runChiSqrd(Allele_Count,Other_Alleles_Count,
+                                Allele_Count_EA_EVS,Allele_Count_EA_Others_EVS
+                   ),by=AlleleKey]
+  uniqueForPValues[,adj_pvalue_bonferroni_EA_EVS:=p.adjust(p.value_Xsqr_EA_EVS,method = "bonferroni"),]
+  uniqueForPValues[,adj_pvalue_fdr_EA_EVS:=p.adjust(p.value_Xsqr_EA_EVS,method = "fdr"),]
+  uniqueForPValues[,c('Allele_Count','Other_Alleles_Count','Allele_Count_EA_EVS','Allele_Count_EA_Others_EVS'):=NULL,]
+  uniqueForPValues[cohortCounts]->cohortCounts
   cohortCounts[!is.na(Allele_Count_EA_Others_EVS),Allele_Frequency_EA_EVS:=Allele_Count_EA_EVS/(Allele_Count_EA_EVS+Allele_Count_EA_Others_EVS),]
   cohortCounts[!is.na(Allele_Frequency_EA_EVS) && Allele_Frequency_EA_EVS>0,OverAbundance_Cohort_EA_EVS:=Cohort_Allele_Frequency/Allele_Frequency_EA_EVS,]
+  
 }
 
 t6<-Sys.time()
