@@ -44,22 +44,25 @@ if("ref1000GPath" %in% names(opt)) {
     reference[,AlleleKey:=paste(Chromosome,Position,Observed_Allele,sep="_"),]
     #setkey(reference,AlleleKey)
     setkeyv(reference,c('AlleleKey','Effect'))
+    setnames(reference,
+             old=c('cDNA pos','codon pos','Protein pos','AA change','Grantham score','Protein Domain','Clinic Sig','Canonical Trans'),
+             new=c('cDNA_pos','Codon_pos','Protein_pos','AA_change','Grantham_score','Protein_Domain','Clinic_Sig','Canonical_Trans'))
     
     reference[,list(
       Obs_Allele_1000G=unique(Observed_Allele)[1],
       Allele_Count_1000G=unique(Allele_Count)[1],
       Total_Alleles_1000G=unique(Total_Alleles)[1],
       Gene=unique(Gene)[1],Ref_Allele_1000G=unique(Ref_Allele)[1],
-      cDNA_pos=unique(get('cDNA pos'))[1],
-      Codon_pos=unique(get('codon pos'))[1],
-      Protein_pos=unique(get('Protein pos'))[1],
-      AA_change=unique(get('AA change'))[1],
-      Grantham_Score=unique(get('Grantham score'))[1],
+      cDNA_pos=unique(cDNA_pos)[1],
+      Codon_pos=unique(Codon_pos)[1],
+      Protein_pos=unique(Protein_pos)[1],
+      AA_change=unique(AA_change)[1],
+      Grantham_Score=unique(Grantham_score)[1],
       dbsnp=paste(unique(unlist(strsplit(dbsnp,split = ";"))),collapse = ";"), 
       PolyPhen=unique(PolyPhen)[1],SIFT=unique(SIFT)[1],
-      Protein_Domain=paste(unique(unlist(strsplit(get('Protein Domain'),split='&'))),collapse = "&"),
-      Clinic_Sig=paste(unique(get('Clinic Sig')),collapse="-"),
-      Canonical_Trans=gsub(pattern = '(^-|-$)', replacement = "", x = paste(unique(get('Canonical Trans')),collapse="-")),
+      Protein_Domain=paste(unique(unlist(strsplit(Protein_Domain,split='&'))),collapse = "&"),
+      Clinic_Sig=paste(unique(Clinic_Sig),collapse="-"),
+      Canonical_Trans=gsub(pattern = '(^-|-$)', replacement = "", x = paste(unique(Canonical_Trans),collapse="-")),
       GERP=unique(GERP)[1],PHYLOP100=unique(PHYLOP100)[1]),
     by=c('AlleleKey','Effect')]->ref_short
     
@@ -74,6 +77,8 @@ print(paste("Initial processing of 1000G : ",t2-t1,sep=""))
 
 if("tabixResult" %in% names(opt)) {
     fread(opt$tabixResult)->exomeVariantTabixRes
+    exomeVariantTabixRes[,EA_Alt_Count:=as.numeric(EA_Alt_Count),]
+    exomeVariantTabixRes[,MAF_EuropeanAmerican:=as.numeric(MAF_EuropeanAmerican),]
     exomeVariantTabixRes[,AlleleKey:=paste(Chrom,Pos,Alternate,sep="_"),]
     exomeVariantTabixRes[MAF_EuropeanAmerican>0,Allele_Count_EA_Others_EVS:=EA_Alt_Count/MAF_EuropeanAmerican,]
     exomeVariantTabixRes[,list(AlleleKey,Reference_EVS=Reference,MAF_EuropeanAmerican,Allele_Count_EA_EVS=EA_Alt_Count,Allele_Count_EA_Others_EVS),]->exomeVariant_short
