@@ -186,21 +186,19 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
     Grantham_Score, dbsnp, PolyPhen, SIFT, Protein_Domain, Clinic_Sig, Canonical_Trans, 
     GERP, PHYLOP100, MAF_EuropeanAmerican 
     ),][order(adj_pvalue_fdr_1000G),])
-  #write.table(file = paste(opt$output,"NotIn1000G","withEVS.xls",sep="_"),sep = '\t', row.names = F, quote = F, 
-  #            x = cohortCounts[is.na(p.value_Xsqr_1000G),list(
-  #              Chrom,
-#                 Position,
-#                 Change=paste(Ref_Allele_1000G,Observed_Allele,sep="->"),
-#                 Cohort_Allele_Count=Allele_Count,
-#                 Cohort_Allele_Frequency=Allele_Count/Assumed_Total_Alleles,
-#                 Allele_Count_EA_EVS,
-#                 Allele_Frequency_EA_EVS=Allele_Count_EA_EVS/(Allele_Count_EA_EVS+Allele_Count_EA_Others_EVS),
-#                 stat_Xsqr_EA_EVS,
-#                 p.value_Xsqr_EA_EVS,
-#                 adj_pvalue_bonferroni_EA_EVS,
-#                 adj_pvalue_fdr_EA_EVS,
-#                 MAF_EuropeanAmerican 
-#               ),])
+  
+  cohortCounts[is.na(p.value_Xsqr_1000G) & is.na(p.value_Xsqr_EA_EVS),list(
+    Chrom,
+    Position,
+    Change=paste("->",Observed_Allele,sep=""),
+    Cohort_Allele_Count=Allele_Count,
+    Cohort_Allele_Frequency#,
+    #Log=log2(Cohort_Allele_Frequency)
+  ),]->toWrite
+  #toWrite[!is.infinite(Log),LogNormalPValue:=as.vector(2*pnorm(-abs(scale(Log,center = TRUE,scale = TRUE)))),]
+  write.table(file = paste(opt$output,"NotIn1000G","NotInEVS.xls",sep="_"),sep = '\t', row.names = F, quote = F, 
+             #x = toWrite[order(LogNormalPValue),])
+             x = toWrite[order(-Cohort_Allele_Frequency),]
 } else if(!("ref1000GPath" %in% names(opt)) && "tabixResult" %in% names(opt)) {
   write.table(file = paste(opt$output,"withEVS.xls",sep="_"),sep = '\t', row.names = F, quote = F, 
               x = cohortCounts[,list(
