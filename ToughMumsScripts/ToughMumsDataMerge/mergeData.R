@@ -185,7 +185,7 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
     Gene, Effect, cDNA_pos, Codon_pos, Protein_pos, AA_change, 
     Grantham_Score, dbsnp, PolyPhen, SIFT, Protein_Domain, Clinic_Sig, Canonical_Trans, 
     GERP, PHYLOP100, MAF_EuropeanAmerican 
-    ),][order(min(adj_pvalue_fdr_1000G,adj_pvalue_fdr_EA_EVS,na.rm = TRUE))])
+    ),][order(adj_pvalue_fdr_1000G),])
   #write.table(file = paste(opt$output,"NotIn1000G","withEVS.xls",sep="_"),sep = '\t', row.names = F, quote = F, 
   #            x = cohortCounts[is.na(p.value_Xsqr_1000G),list(
   #              Chrom,
