@@ -162,7 +162,7 @@ print(paste("Secondary processing of EVS : ",t6-t5,sep=""))
 # SIFT    Protein_Domain    Clinic_Sig    Canonical_Trans    GERP    PHYLOP100
 if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
   write.table(file = paste(opt$output,"significant1000G","withEVS.xls",sep="_"),sep = '\t', row.names = F, quote = F, 
-   x = cohortCounts[adj_pvalue_fdr_1000G<0.05 || adj_pvalue_fdr_EA_EVS<0.05,list(
+   x = cohortCounts[adj_pvalue_fdr_1000G<0.05 | adj_pvalue_fdr_EA_EVS<0.05,list(
     Chrom,
     Position,
     Change=paste(Ref_Allele_1000G,Observed_Allele,sep="->"),
