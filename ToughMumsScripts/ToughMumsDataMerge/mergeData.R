@@ -198,7 +198,7 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
   #toWrite[!is.infinite(Log),LogNormalPValue:=as.vector(2*pnorm(-abs(scale(Log,center = TRUE,scale = TRUE)))),]
   write.table(file = paste(opt$output,"NotIn1000G","NotInEVS.xls",sep="_"),sep = '\t', row.names = F, quote = F, 
              #x = toWrite[order(LogNormalPValue),])
-             x = toWrite[order(-Cohort_Allele_Frequency),]
+             x = toWrite[order(-Cohort_Allele_Frequency),])
 } else if(!("ref1000GPath" %in% names(opt)) && "tabixResult" %in% names(opt)) {
   write.table(file = paste(opt$output,"withEVS.xls",sep="_"),sep = '\t', row.names = F, quote = F, 
               x = cohortCounts[,list(
