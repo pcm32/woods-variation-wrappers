@@ -2,7 +2,7 @@ suppressPackageStartupMessages(library(optparse))
 suppressPackageStartupMessages(library(data.table))
 
 options_list<-list(
-  make_option(c("--cohortCounts","-c"),help="cohorts count file",),
+  make_option(c("--cohortCounts","-c"),help="cohorts count file"),
   make_option(c("--output","-o"),help="ouput full path name"),
   make_option(c("--tabixResult","-t"),help="full path to tabix processed result"),
   make_option(c("--femaleCount","-f"),help="Number of females",type="integer"),
@@ -165,7 +165,7 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
    x = cohortCounts[adj_pvalue_fdr_1000G<0.05 | adj_pvalue_fdr_EA_EVS<0.05,list(
     Chrom,
     Position,
-    Change=paste(Ref_Allele_1000G,Observed_Allele,sep="->"),
+    Change=paste(Reference_Allele,Observed_Allele,sep="->"),
     Cohort_Allele_Count=Allele_Count,
     Cohort_Allele_Frequency,
     Allele_Count_1000G,
@@ -190,7 +190,7 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
   cohortCounts[is.na(p.value_Xsqr_1000G) & is.na(p.value_Xsqr_EA_EVS),list(
     Chrom,
     Position,
-    Change=paste("->",Observed_Allele,sep=""),
+    Change=paste(Reference_Allele,Observed_Allele,sep="->"),
     Cohort_Allele_Count=Allele_Count,
     Cohort_Allele_Frequency#,
     #Log=log2(Cohort_Allele_Frequency)
