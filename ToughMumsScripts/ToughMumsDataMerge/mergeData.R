@@ -204,7 +204,7 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
               x = cohortCounts[,list(
                 Chrom,
                 Position,
-                Change=paste(Ref_Allele_1000G,Observed_Allele,sep="->"),
+                Change=paste(Reference_Allele,Observed_Allele,sep="->"),
                 Cohort_Allele_Count=Allele_Count,
                 Cohort_Allele_Frequency,
                 Allele_Count_EA_EVS,
@@ -239,7 +239,7 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
               x = cohortCounts[is.na(p.value_Xsqr_1000G),list(
                 Chrom,
                 Position,
-                Change=paste(Ref_Allele_1000G,Observed_Allele,sep="->"),
+                Change=paste(Reference_Allele,Observed_Allele,sep="->"),
                 Cohort_Allele_Count=Allele_Count,
                 Cohort_Allele_Frequency
               ),])
@@ -248,7 +248,7 @@ if("ref1000GPath" %in% names(opt) && "tabixResult" %in% names(opt)) {
               x = cohortCounts[,list(
                 Chrom,
                 Position,
-                Change=paste("?->",Observed_Allele),
+                Change=paste(Reference_Allele,Observed_Allele,sep="->"),
                 Cohort_Allele_Count=Allele_Count,
                 Cohort_Allele_Frequency
               ),])

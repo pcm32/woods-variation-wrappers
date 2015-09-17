@@ -227,7 +227,7 @@ if [ $useBAMs ]; then
 fi
 
 echo "source $WRAPPERDIR/settings.sh" >> $TOUGHMUMSEXEC
-echo "perl $TOUGHMUMSPATH/getCohortCounts.pl $IDENTIFIERS_DEST > $TOUGHMUMSTEMP/cohortCounts.txt" >> $TOUGHMUMSEXEC
+echo "perl $TOUGHMUMSPATHSC/getCohortCounts.pl $IDENTIFIERS_DEST > $TOUGHMUMSTEMP/cohortCounts.txt" >> $TOUGHMUMSEXEC
 echo "echo \"Done getCohortCounts.pl\" 1>&2" >> $TOUGHMUMSEXEC
 ########
 #
