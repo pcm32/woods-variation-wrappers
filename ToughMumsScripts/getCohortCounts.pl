@@ -78,7 +78,7 @@ foreach my $chrom (sort keys %muts) {
 			my @line = (
 			$chrom, $loc,
 			$obsAllele, $muts{$chrom}{$loc}{$obsAllele},
-			$numAlleles, $refAlleles{$chrom}{$loc} )
+			$numAlleles, $refAlleles{$chrom}{$loc} );
 			print join("\t", @line) . "\n";
 		}
 	}
