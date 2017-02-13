@@ -124,6 +124,9 @@ then
 	then
 		PARAMETERS="-Ext –snpF=0.1"
 		XREFCUTOFF=2
+		# TODO remove the cross reference requirement if working with just one individual
+		#TOTALINDIVIDUALS=${#identsArray[@]}
+		#$(echo $IDENTIFIERS | tr ":" "\n")
 		if [ -z $CROSSREFIDs ]
 		then
 			echo "-s option 2 requires option -c for CrossRefs ids being set, exiting"

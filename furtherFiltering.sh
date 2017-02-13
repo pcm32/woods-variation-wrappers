@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO find mutations that are present in the child (affected) but not in parents. Currently is producing the opposite result as required (showing currently the intersection of mutations between child and parents), when the result wanted are the new mutations shown by 
+# the child that are not present in the parents. This should be available as a 4th option (-p) called de-novo dominant
+
 source settings.sh
 
 while [[ $# > 1 ]]
